@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Record Production | MSME Production System Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: #f0f4f8; min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100%;
+            background: linear-gradient(180deg, #1e4b2e 0%, #0f2e1e 100%);
+            color: white;
+            z-index: 100;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header { padding: 28px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header h2 { font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
+        .sidebar-header p { font-size: 0.7rem; opacity: 0.7; margin-top: 8px; }
+        
+        .nav-menu { padding: 24px 0; }
+        .nav-item { padding: 12px 24px; display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.8); text-decoration: none; transition: all 0.2s; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: white; border-left: 4px solid #f59e0b; }
+        .nav-item i { width: 24px; font-size: 1.2rem; }
+        
+        .user-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.2);
+        }
+
+        .user-info .user-name { font-weight: 600; margin-bottom: 4px; }
+        .user-info .user-role { font-size: 0.75rem; opacity: 0.7; }
+
+        .logout-btn {
+            margin-top: 12px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .main-content { margin-left: 280px; padding: 24px; }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-title h1 { font-size: 1.8rem; color: #1f3b2c; }
+        .page-title p { color: #6c7a89; margin-top: 4px; }
+
+        .back-btn {
+            background: #e2e8f0;
+            padding: 10px 20px;
+            border-radius: 40px;
+            text-decoration: none;
+            color: #2d3748;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            margin-bottom: 28px;
+            overflow: hidden;
+        }
+
+        .card-header { padding: 24px 28px; border-bottom: 2px solid #f0f2f5; }
+        .card-header h2 { color: #1f3b2c; }
+        .card-body { padding: 28px; }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .form-group { margin-bottom: 24px; }
+
+        label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            transition: 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: #2c7a4a;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(44,122,74,0.1);
+        }
+
+        input[readonly] {
+            background: #f8fafc;
+            color: #1f3b2c;
+            font-weight: 700;
+        }
+        
+        button {
+            background: #2c7a4a;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #1f5e3a;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: white;
+            color: #2d3748;
+            border: 2px solid #cbd5e0;
+        }
+
+        .btn-outline:hover {
+            background: #f8fafc;
+            border-color: #2c7a4a;
+            color: #1f3b2c;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            padding: 10px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        
+        .profit-preview {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6d9);
+            padding: 24px;
+            border-radius: 20px;
+            margin-top: 24px;
+            text-align: center;
+        }
+
+        .profit-preview h3 { color: #1f3b2c; margin-bottom: 12px; }
+        .profit-amount { font-size: 2.5rem; font-weight: 800; color: #2c7a4a; }
+        
+        .alert-success {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 16px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .raw-materials-box {
+            margin-top: 10px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 24px;
+            border: 2px dashed #cbd5e0;
+        }
+
+        .raw-materials-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .raw-materials-header h3 {
+            color: #1f3b2c;
+            font-size: 1.1rem;
+        }
+
+        .raw-row {
+            display: grid;
+            grid-template-columns: 1.3fr 0.8fr 0.8fr 0.9fr auto;
+            gap: 12px;
+            align-items: end;
+            margin-bottom: 14px;
+            padding: 14px;
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .raw-row .form-group {
+            margin-bottom: 0;
+        }
+
+        .raw-total-box {
+            margin-top: 18px;
+            background: white;
+            border-radius: 20px;
+            padding: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            border: 1px solid #e2e8f0;
+        }
+
+        .raw-total-box strong {
+            color: #1f3b2c;
+            font-size: 1.1rem;
+        }
+
+        .raw-total-amount {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #2c7a4a;
+        }
+        
+        @media (max-width: 900px) {
+            .raw-row {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-danger {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-chart-line"></i> MSME Production</h2>
+            <p>Management System</p>
+        </div>
+
+        <div class="nav-menu">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+
+            <a href="production.html" class="nav-item active">
+                <i class="fas fa-plus-circle"></i> Record Production
+            </a>
+
+            <a href="sales.html" class="nav-item">
+                <i class="fas fa-cash-register"></i> Record Sale
+            </a>
+
+            <a href="analytics.html" class="nav-item">
+                <i class="fas fa-chart-bar"></i> Analytics
+            </a>
+
+            <a href="records.html" class="nav-item">
+                <i class="fas fa-database"></i> Production Records
+            </a>
+
+            <a href="reports.html" class="nav-item">
+                <i class="fas fa-file-alt"></i> Reports
+            </a>
+        </div>
+
+        <div class="user-info">
+            <div class="user-name" id="userName">Loading...</div>
+            <div class="user-role" id="userRole">Loading...</div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title">
+                <h1><i class="fas fa-plus-circle"></i> Record Production</h1>
+                <p>MSME Production System Management - Enter production details, raw materials, and calculate profit automatically</p>
+            </div>
+
+            <a href="dashboard.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-clipboard-list"></i> Production Entry Form</h2>
+            </div>
+
+            <div class="card-body">
+                <div id="successAlert" class="alert-success">
+                    <i class="fas fa-check-circle"></i> Production record added successfully!
+                </div>
+                
+                <form id="productionForm">
+                    <div class="form-grid">
+                        <div>
+                            <div class="form-group">
+                                <label><i class="fas fa-utensils"></i> Product Name *</label>
+                                <input type="text" id="prodName" placeholder="e.g., Pandesal, Sourdough Bread" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label><i class="fas fa-weight-hanging"></i> Output Quantity (units) *</label>
+                                <input type="number" id="outputQty" step="1" min="1" value="0" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label><i class="fas fa-coins"></i> Total Raw Material Cost (PHP) *</label>
+                                <input type="number" id="rawCost" step="0.01" value="0" readonly required>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="form-group">
+                                <label><i class="fas fa-tag"></i> Selling Price per Unit (PHP) *</label>
+                                <input type="number" id="sellPrice" step="0.01" min="0" value="0" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label><i class="fas fa-calendar-alt"></i> Production Date *</label>
+                                <input type="date" id="prodDate" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label><i class="fas fa-barcode"></i> Batch Number (Optional)</label>
+                                <input type="text" id="batchId" placeholder="AUTO or custom batch ID">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="raw-materials-box">
+                        <div class="raw-materials-header">
+                            <h3><i class="fas fa-box-open"></i> Raw Materials Used</h3>
+
+                            <button type="button" class="btn-outline" onclick="addRawMaterialRow()">
+                                <i class="fas fa-plus"></i> Add Raw Material
+                            </button>
+                        </div>
+
+                        <div id="rawMaterialsContainer"></div>
+
+                        <div class="raw-total-box">
+                            <strong><i class="fas fa-calculator"></i> Auto Total Raw Cost</strong>
+                            <div class="raw-total-amount" id="rawTotalDisplay">₱0.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="profit-preview" id="profitPreview">
+                        <h3><i class="fas fa-chart-line"></i> Profit Preview</h3>
+                        <div class="profit-amount" id="previewProfit">₱0.00</div>
+                        <p>Formula: (Selling Price × Quantity) - Total Raw Material Cost</p>
+                    </div>
+                    
+                    <button type="submit" style="width:100%; margin-top: 20px;">
+                        <i class="fas fa-save"></i> Record Production & Calculate Profit
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-info-circle"></i> How Profit is Calculated</h2>
+            </div>
+
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div style="text-align: center; padding: 20px; background: #f8fafc; border-radius: 20px;">
+                        <i class="fas fa-chart-line" style="font-size: 2rem; color: #2c7a4a;"></i>
+                        <h4>Total Revenue</h4>
+                        <p>Selling Price × Quantity</p>
+                    </div>
+
+                    <div style="text-align: center; padding: 20px; background: #f8fafc; border-radius: 20px;">
+                        <i class="fas fa-minus-circle" style="font-size: 2rem; color: #f59e0b;"></i>
+                        <h4>Minus</h4>
+                        <p>Total Raw Material Cost</p>
+                    </div>
+
+                    <div style="text-align: center; padding: 20px; background: #f8fafc; border-radius: 20px;">
+                        <i class="fas fa-equals" style="font-size: 2rem; color: #2c7a4a;"></i>
+                        <h4>Equals Profit</h4>
+                        <p>Net Profit per Batch</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+import { firebaseService } from './firebase-config.js';
+
+let productions = [];
+let sales = [];
+
+function checkAuth() {
+    const session = localStorage.getItem("msme_production_session");
+    if (!session) {
+        window.location.href = "login.html";
+        return false;
+    }
+    const sessionData = JSON.parse(session);
+    if (!sessionData.loggedIn) {
+        window.location.href = "login.html";
+        return false;
+    }
+    document.getElementById("userName").innerText = sessionData.name || sessionData.username;
+    document.getElementById("userRole").innerText = sessionData.role.toUpperCase();
+    return true;
+}
+
+function logout() {
+    firebaseService.logoutUser();
+    localStorage.removeItem("msme_production_session");
+    window.location.href = "login.html";
+}
+
+function getNumber(value) {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : 0;
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function addRawMaterialRow(material = {}) {
+    const container = document.getElementById("rawMaterialsContainer");
+    const row = document.createElement("div");
+    row.className = "raw-row";
+    row.innerHTML = `
+        <div class="form-group">
+            <label>Raw Material Name *</label>
+            <input type="text" class="raw-name" placeholder="e.g., Flour, Sugar, Yeast" value="${escapeHtml(material.name || '')}" required>
+        </div>
+        <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" class="raw-qty" step="0.01" min="0" placeholder="0" value="${getNumber(material.qty || 0)}">
+        </div>
+        <div class="form-group">
+            <label>Unit</label>
+            <input type="text" class="raw-unit" placeholder="kg, pcs, pack" value="${escapeHtml(material.unit || '')}">
+        </div>
+        <div class="form-group">
+            <label>Cost (PHP) *</label>
+            <input type="number" class="raw-cost-item" step="0.01" min="0" placeholder="0.00" value="${getNumber(material.cost || 0)}" required>
+        </div>
+        <button type="button" class="btn-danger" onclick="removeRawMaterialRow(this)">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+    container.appendChild(row);
+    row.querySelectorAll("input").forEach(input => {
+        input.addEventListener("input", updateRawCostAndProfit);
+    });
+    updateRawCostAndProfit();
+}
+
+window.removeRawMaterialRow = function(button) {
+    const container = document.getElementById("rawMaterialsContainer");
+    if (container.children.length <= 1) {
+        alert("At least one raw material is required.");
+        return;
+    }
+    button.closest(".raw-row").remove();
+    updateRawCostAndProfit();
+};
+
+function getRawMaterials() {
+    const rows = document.querySelectorAll(".raw-row");
+    return Array.from(rows).map(row => ({
+        name: row.querySelector(".raw-name").value.trim(),
+        qty: getNumber(row.querySelector(".raw-qty").value),
+        unit: row.querySelector(".raw-unit").value.trim(),
+        cost: getNumber(row.querySelector(".raw-cost-item").value)
+    })).filter(item => item.name || item.qty > 0 || item.unit || item.cost > 0);
+}
+
+function calculateRawTotal() {
+    return getRawMaterials().reduce((sum, item) => sum + getNumber(item.cost), 0);
+}
+
+function updateRawCostAndProfit() {
+    const totalRawCost = calculateRawTotal();
+    document.getElementById("rawCost").value = totalRawCost.toFixed(2);
+    document.getElementById("rawTotalDisplay").innerText = `₱${totalRawCost.toFixed(2)}`;
+    updateProfitPreview();
+}
+
+function updateProfitPreview() {
+    const qty = getNumber(document.getElementById("outputQty").value);
+    const price = getNumber(document.getElementById("sellPrice").value);
+    const raw = getNumber(document.getElementById("rawCost").value);
+    const profit = (qty * price) - raw;
+    const previewDiv = document.getElementById("previewProfit");
+    previewDiv.innerHTML = `₱${profit.toFixed(2)}`;
+    previewDiv.style.color = profit >= 0 ? "#2c7a4a" : "#dc2626";
+}
+
+function resetRawMaterials() {
+    document.getElementById("rawMaterialsContainer").innerHTML = "";
+    addRawMaterialRow();
+    updateRawCostAndProfit();
+}
+
+function showAlert(message) {
+    const alertBox = document.getElementById("successAlert");
+    alertBox.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+    alertBox.style.display = "flex";
+    setTimeout(() => { alertBox.style.display = "none"; }, 3000);
+}
+
+document.getElementById("outputQty").addEventListener("input", updateProfitPreview);
+document.getElementById("sellPrice").addEventListener("input", updateProfitPreview);
+document.getElementById("rawCost").addEventListener("input", updateProfitPreview);
+
+document.getElementById("productionForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    const prodName = document.getElementById("prodName").value.trim();
+    const outputQty = getNumber(document.getElementById("outputQty").value);
+    const rawCost = getNumber(document.getElementById("rawCost").value);
+    const sellPrice = getNumber(document.getElementById("sellPrice").value);
+    const prodDate = document.getElementById("prodDate").value;
+    const batchId = document.getElementById("batchId").value.trim() || `BATCH-${new Date().toISOString().slice(0,10)}-${Math.floor(Math.random() * 1000)}`;
+    const rawMaterials = getRawMaterials();
+    
+    if (!prodName || !prodDate) {
+        alert("Please fill all required fields.");
+        return;
+    }
+    
+    if (outputQty <= 0 || rawCost < 0 || sellPrice < 0) {
+        alert("Please enter valid production values.");
+        return;
+    }
+    
+    if (rawMaterials.length === 0) {
+        alert("Please add at least one raw material used.");
+        return;
+    }
+    
+    const invalidMaterial = rawMaterials.find(item => !item.name || item.cost < 0);
+    if (invalidMaterial) {
+        alert("Please complete all raw material names and valid costs.");
+        return;
+    }
+    
+    const profit = (sellPrice * outputQty) - rawCost;
+    
+    const productionData = {
+        prodName,
+        outputQty,
+        soldQty: 0,
+        stockQty: outputQty,
+        rawMaterials,
+        rawCost,
+        sellPrice,
+        prodDate,
+        batchId,
+        profit
+    };
+    
+    const result = await firebaseService.addProduction(productionData);
+    
+    if (result.success) {
+        document.getElementById("productionForm").reset();
+        document.getElementById("prodDate").valueAsDate = new Date();
+        resetRawMaterials();
+        updateProfitPreview();
+        showAlert("Production record added successfully! Raw materials and profit calculated.");
+    } else {
+        alert("Error saving production: " + result.error);
+    }
+});
+
+// Initialize
+if (checkAuth()) {
+    if (!document.getElementById("prodDate").value) {
+        document.getElementById("prodDate").valueAsDate = new Date();
+    }
+    resetRawMaterials();
+    updateProfitPreview();
+}
+
+// Make functions globally accessible for inline onclick
+window.addRawMaterialRow = addRawMaterialRow;
+window.removeRawMaterialRow = removeRawMaterialRow;
+window.logout = logout;
+</script>
+</body>
+</html>

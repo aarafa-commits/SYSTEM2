@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Record Sale | MSME Production System Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: #f0f4f8; min-height: 100vh; }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100%;
+            background: linear-gradient(180deg, #1e4b2e 0%, #0f2e1e 100%);
+            color: white;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .sidebar-header { padding: 28px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header h2 { font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
+        .sidebar-header p { font-size: 0.7rem; opacity: 0.7; margin-top: 8px; }
+
+        .nav-menu { padding: 24px 0; }
+        .nav-item {
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left: 4px solid #f59e0b;
+        }
+        .nav-item i { width: 24px; font-size: 1.2rem; }
+
+        .user-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.2);
+        }
+        .user-info .user-name { font-weight: 600; margin-bottom: 4px; }
+        .user-info .user-role { font-size: 0.75rem; opacity: 0.7; }
+        .logout-btn {
+            margin-top: 12px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .main-content { margin-left: 280px; padding: 24px; }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-title h1 { font-size: 1.8rem; color: #1f3b2c; }
+        .page-title p { color: #6c7a89; margin-top: 4px; }
+
+        .back-btn {
+            background: #e2e8f0;
+            padding: 10px 20px;
+            border-radius: 40px;
+            text-decoration: none;
+            color: #2d3748;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            margin-bottom: 28px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 24px 28px;
+            border-bottom: 2px solid #f0f2f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .card-header h2 { color: #1f3b2c; }
+        .card-body { padding: 28px; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .form-group { margin-bottom: 24px; }
+        label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            transition: 0.2s;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #2c7a4a;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(44,122,74,0.1);
+        }
+
+        input[readonly] {
+            background: #f8fafc;
+            color: #475569;
+        }
+
+        .autocomplete-wrap {
+            position: relative;
+        }
+
+        .suggestions-box {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 18px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+            z-index: 20;
+            max-height: 260px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 12px 14px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            transition: 0.15s;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover,
+        .suggestion-item.active {
+            background: #f0fdf4;
+        }
+
+        .suggestion-name {
+            font-weight: 800;
+            color: #1f3b2c;
+            margin-bottom: 4px;
+        }
+
+        .suggestion-meta {
+            color: #64748b;
+            font-size: 0.82rem;
+        }
+
+        .suggestion-empty {
+            padding: 14px;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        button {
+            background: #2c7a4a;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #1f5e3a;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: white;
+            border: 2px solid #cbd5e0;
+            color: #2d3748;
+        }
+
+        .btn-outline:hover {
+            background: #f8fafc;
+            border-color: #2c7a4a;
+            color: #1f3b2c;
+        }
+
+        .btn-edit {
+            background: #f59e0b;
+            padding: 8px 12px;
+            border-radius: 18px;
+            font-size: 0.8rem;
+        }
+        .btn-edit:hover { background: #d97706; }
+
+        .btn-delete {
+            background: #dc2626;
+            padding: 8px 12px;
+            border-radius: 18px;
+            font-size: 0.8rem;
+        }
+        .btn-delete:hover { background: #b91c1c; }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .form-actions button { flex: 1; justify-content: center; }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 16px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 16px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .edit-banner {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 14px 16px;
+            border-radius: 18px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .stock-box {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6d9);
+            padding: 24px;
+            border-radius: 20px;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .stock-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #2c7a4a;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #edf2f7;
+            vertical-align: middle;
+        }
+        th { background: #f8fafc; color: #1f3b2c; }
+        .empty { text-align: center; padding: 36px; color: #64748b; }
+        .action-cell { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main-content { margin-left: 0; }
+            .table-responsive { overflow-x: auto; }
+            table { min-width: 850px; }
+            .form-actions button { flex: unset; width: 100%; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-chart-line"></i> MSME Production</h2>
+            <p>Management System</p>
+        </div>
+
+        <div class="nav-menu">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="production.html" class="nav-item"><i class="fas fa-plus-circle"></i> Record Production</a>
+            <a href="sales.html" class="nav-item active"><i class="fas fa-cash-register"></i> Record Sale</a>
+            <a href="analytics.html" class="nav-item"><i class="fas fa-chart-bar"></i> Analytics</a>
+            <a href="records.html" class="nav-item"><i class="fas fa-database"></i> Production Records</a>
+            <a href="reports.html" class="nav-item"><i class="fas fa-file-alt"></i> Reports</a>
+        </div>
+
+        <div class="user-info">
+            <div class="user-name" id="userName">Loading...</div>
+            <div class="user-role" id="userRole">Loading...</div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title">
+                <h1><i class="fas fa-cash-register"></i> Record Sale</h1>
+                <p>Record, edit, delete sales and automatically update production stock.</p>
+            </div>
+            <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-receipt"></i> Sales Entry Form</h2>
+            </div>
+
+            <div class="card-body">
+                <div id="successAlert" class="alert-success">
+                    <i class="fas fa-check-circle"></i> Sale recorded successfully!
+                </div>
+
+                <div id="errorAlert" class="alert-error">
+                    <i class="fas fa-exclamation-circle"></i> Unable to record sale.
+                </div>
+
+                <div id="editBanner" class="edit-banner">
+                    <i class="fas fa-pen-to-square"></i> Editing sale record. Submit to save changes or cancel editing.
+                </div>
+
+                <form id="saleForm">
+                    <div class="form-grid">
+                        <div>
+                            <div class="form-group">
+                                <label><i class="fas fa-utensils"></i> Product *</label>
+                                <div class="autocomplete-wrap">
+                                    <input type="text" id="saleProduct" placeholder="Type product name..." autocomplete="off" required>
+                                    <div id="productSuggestions" class="suggestions-box"></div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label><i class="fas fa-boxes"></i> Quantity Sold *</label>
+                                <input type="number" id="saleQty" step="1" min="1" value="1" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label><i class="fas fa-tag"></i> Selling Price per Unit (PHP) *</label>
+                                <input type="number" id="saleUnitPrice" step="0.01" min="0" value="0" required>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="form-group">
+                                <label><i class="fas fa-calendar-alt"></i> Sale Date *</label>
+                                <input type="date" id="saleDate" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label><i class="fas fa-calculator"></i> Total Sale Amount</label>
+                                <input type="number" id="saleTotal" step="0.01" value="0" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label><i class="fas fa-note-sticky"></i> Notes / Customer Optional</label>
+                                <textarea id="saleNotes" placeholder="e.g., Walk-in customer, reseller, online order"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stock-box">
+                        <h3>Available Stock</h3>
+                        <div class="stock-number" id="availableStock">0</div>
+                        <p id="stockHint">Select a product to see available stock.</p>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" id="submitSaleBtn">
+                            <i class="fas fa-save"></i> Record Sale & Deduct Stock
+                        </button>
+                        <button type="button" id="cancelEditBtn" class="btn-outline" style="display:none;" onclick="cancelEdit()">
+                            <i class="fas fa-times"></i> Cancel Edit
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-list"></i> Recent Sales</h2>
+                <div>Total sales records: <span id="salesCount">0</span></div>
+            </div>
+
+            <div class="card-body table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
+                            <th>Notes</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+import { firebaseService } from './firebase-config.js';
+
+let productions = [];
+let sales = [];
+let editSaleId = null;
+let selectedProductName = "";
+let unsubscribeProductions = null;
+let unsubscribeSales = null;
+
+function checkAuth() {
+    const session = localStorage.getItem("msme_production_session");
+    if (!session) {
+        window.location.href = "login.html";
+        return false;
+    }
+    const sessionData = JSON.parse(session);
+    if (!sessionData.loggedIn) {
+        window.location.href = "login.html";
+        return false;
+    }
+    document.getElementById("userName").innerText = sessionData.name || sessionData.username;
+    document.getElementById("userRole").innerText = sessionData.role.toUpperCase();
+    return true;
+}
+
+function logout() {
+    localStorage.removeItem("msme_production_session");
+    window.location.href = "login.html";
+}
+
+function getNumber(value) {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : 0;
+}
+
+function formatNumber(value) {
+    const num = getNumber(value);
+    return Number.isInteger(num) ? num.toString() : num.toFixed(2);
+}
+
+function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+    });
+}
+
+function escapeForAttribute(str) {
+    return String(str ?? '')
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+function loadData() {
+    // Listen for real-time updates
+    if (unsubscribeProductions) unsubscribeProductions();
+    if (unsubscribeSales) unsubscribeSales();
+    
+    unsubscribeProductions = firebaseService.listenProductions((data) => {
+        productions = data;
+        renderProducts();
+        renderSales();
+        updateSalePreview();
+    });
+    
+    unsubscribeSales = firebaseService.listenSales((data) => {
+        sales = data;
+        renderSales();
+        renderProducts();
+        updateSalePreview();
+    });
+}
+
+function getStockByProduct(sourceProductions = productions) {
+    return sourceProductions.reduce(function(map, p) {
+        const name = p.prodName || 'Unnamed Product';
+        if (!map[name]) {
+            map[name] = { stock: 0, suggestedPrice: 0 };
+        }
+        map[name].stock += getNumber(p.stockQty);
+        if (getNumber(p.sellPrice) > 0) {
+            map[name].suggestedPrice = getNumber(p.sellPrice);
+        }
+        return map;
+    }, {});
+}
+
+function getAvailableProducts(selectedProduct = '') {
+    const stockMap = getStockByProduct();
+    return Object.entries(stockMap)
+        .filter(function(entry) {
+            return entry[1].stock > 0 || entry[0] === selectedProduct;
+        })
+        .sort(function(a, b) { return a[0].localeCompare(b[0]); })
+        .map(function(entry) {
+            return {
+                name: entry[0],
+                stock: getNumber(entry[1].stock),
+                suggestedPrice: getNumber(entry[1].suggestedPrice)
+            };
+        });
+}
+
+function renderProducts(selectedProduct = '') {
+    const input = document.getElementById('saleProduct');
+    const products = getAvailableProducts(selectedProduct);
+    if (products.length === 0) {
+        input.value = '';
+        input.placeholder = 'No available stock. Add production first.';
+        input.disabled = true;
+        selectedProductName = '';
+        hideProductSuggestions();
+        return;
+    }
+    input.disabled = false;
+    input.placeholder = 'Type product name...';
+    if (selectedProduct) {
+        input.value = selectedProduct;
+        selectedProductName = selectedProduct;
+    }
+    const selected = products.find(function(item) { return item.name === selectedProductName; });
+    if (selected && !editSaleId) {
+        document.getElementById('saleUnitPrice').value = selected.suggestedPrice.toFixed(2);
+    }
+    updateSalePreview();
+}
+
+function showProductSuggestions(query = '') {
+    const box = document.getElementById('productSuggestions');
+    const products = getAvailableProducts(selectedProductName);
+    const search = String(query || '').toLowerCase().trim();
+    let matches = products;
+    if (search) {
+        matches = products.filter(function(product) {
+            return product.name.toLowerCase().includes(search);
+        });
+    }
+    if (matches.length === 0) {
+        box.innerHTML = '<div class="suggestion-empty">No matching product with available stock.</div>';
+        box.style.display = 'block';
+        return;
+    }
+    box.innerHTML = matches.slice(0, 12).map(function(product) {
+        return `
+            <div class="suggestion-item" onclick="window.selectProduct('${escapeForAttribute(product.name)}')">
+                <div class="suggestion-name">${escapeHtml(product.name)}</div>
+                <div class="suggestion-meta">${formatNumber(product.stock)} available • Suggested price: ₱${product.suggestedPrice.toFixed(2)}</div>
+            </div>
+        `;
+    }).join('');
+    box.style.display = 'block';
+}
+
+function hideProductSuggestions() {
+    document.getElementById('productSuggestions').style.display = 'none';
+}
+
+window.selectProduct = function(productName) {
+    const products = getAvailableProducts(productName);
+    const selected = products.find(function(product) { return product.name === productName; });
+    if (!selected) {
+        selectedProductName = '';
+        document.getElementById('saleProduct').value = '';
+        updateSalePreview();
+        hideProductSuggestions();
+        showMessage('errorAlert', 'Selected product has no available stock.');
+        return;
+    }
+    selectedProductName = productName;
+    document.getElementById('saleProduct').value = productName;
+    if (!editSaleId) {
+        document.getElementById('saleUnitPrice').value = selected.suggestedPrice.toFixed(2);
+    }
+    hideProductSuggestions();
+    updateSalePreview();
+};
+
+function validateTypedProduct() {
+    const inputValue = document.getElementById('saleProduct').value.trim();
+    const products = getAvailableProducts(selectedProductName);
+    const exact = products.find(function(product) {
+        return product.name.toLowerCase() === inputValue.toLowerCase();
+    });
+    if (exact) {
+        window.selectProduct(exact.name);
+        return true;
+    }
+    selectedProductName = '';
+    updateSalePreview();
+    if (inputValue) {
+        showMessage('errorAlert', 'Please choose a product from the suggestions.');
+    }
+    return false;
+}
+
+function updateSalePreview() {
+    const stockMap = getStockByProduct();
+    const productName = selectedProductName || document.getElementById('saleProduct').value.trim();
+    const stock = stockMap[productName] ? getNumber(stockMap[productName].stock) : 0;
+    document.getElementById('availableStock').innerText = stock;
+    document.getElementById('stockHint').innerText = productName && stock > 0
+        ? 'Sale will deduct from oldest production batches first.'
+        : productName
+            ? 'Please select a valid product with available stock.'
+            : 'Type a product name and choose from the suggestions.';
+    const qty = getNumber(document.getElementById('saleQty').value);
+    const price = getNumber(document.getElementById('saleUnitPrice').value);
+    document.getElementById('saleTotal').value = (qty * price).toFixed(2);
+}
+
+function showMessage(id, message) {
+    const el = document.getElementById(id);
+    const icon = id === 'successAlert' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    el.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+    el.style.display = 'flex';
+    setTimeout(function() { el.style.display = 'none'; }, 3500);
+}
+
+async function renderSales() {
+    document.getElementById('salesCount').innerText = sales.length;
+    const tbody = document.getElementById('salesTableBody');
+    if (sales.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty">No sales recorded yet.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = [...sales]
+        .sort(function(a, b) {
+            return new Date(b.timestamp || b.saleDate) - new Date(a.timestamp || a.saleDate);
+        })
+        .slice(0, 30)
+        .map(function(s) {
+            return `
+                <tr>
+                    <td>${escapeHtml(s.saleDate)}</td>
+                    <td><strong>${escapeHtml(s.prodName)}</strong></td>
+                    <td>${getNumber(s.saleQty)}</td>
+                    <td>₱${getNumber(s.unitPrice).toFixed(2)}</td>
+                    <td>₱${getNumber(s.totalAmount).toFixed(2)}</td>
+                    <td>${escapeHtml(s.notes || '')}</td>
+                    <td>
+                        <div class="action-cell">
+                            <button class="btn-edit" onclick="window.editSale('${String(s.id)}')"><i class="fas fa-pen"></i> Edit</button>
+                            <button class="btn-delete" onclick="window.deleteSale('${String(s.id)}')"><i class="fas fa-trash"></i> Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+}
+
+window.editSale = async function(id) {
+    const sale = sales.find(function(item) { return String(item.id) === String(id); });
+    if (!sale) {
+        showMessage('errorAlert', 'Sale record not found.');
+        return;
+    }
+    editSaleId = sale.id;
+    selectedProductName = sale.prodName || '';
+    document.getElementById('saleProduct').value = selectedProductName;
+    document.getElementById('saleQty').value = getNumber(sale.saleQty);
+    document.getElementById('saleUnitPrice').value = getNumber(sale.unitPrice).toFixed(2);
+    document.getElementById('saleDate').value = sale.saleDate || new Date().toISOString().slice(0, 10);
+    document.getElementById('saleNotes').value = sale.notes || '';
+    document.getElementById('submitSaleBtn').innerHTML = '<i class="fas fa-save"></i> Save Sale Changes';
+    document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+    document.getElementById('editBanner').style.display = 'flex';
+    updateSalePreview();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+window.cancelEdit = function() {
+    editSaleId = null;
+    selectedProductName = "";
+    document.getElementById('saleForm').reset();
+    document.getElementById('saleDate').valueAsDate = new Date();
+    document.getElementById('submitSaleBtn').innerHTML = '<i class="fas fa-save"></i> Record Sale & Deduct Stock';
+    document.getElementById('cancelEditBtn').style.display = 'none';
+    document.getElementById('editBanner').style.display = 'none';
+    loadData();
+};
+
+window.deleteSale = async function(id) {
+    const sale = sales.find(function(item) { return String(item.id) === String(id); });
+    if (!sale) {
+        showMessage('errorAlert', 'Sale record not found.');
+        return;
+    }
+    if (!confirm('Delete this sale record? This will restore the sold quantity back to production stock.')) {
+        return;
+    }
+
+    // Restore stock to every production batch this sale drew from.
+    // Prefer saleLines (covers sales split across multiple batches); fall
+    // back to the single productionId for older records without saleLines.
+    const linesToRestore = (Array.isArray(sale.saleLines) && sale.saleLines.length > 0)
+        ? sale.saleLines
+        : (sale.productionId ? [{ productionId: sale.productionId, qty: sale.saleQty }] : []);
+
+    for (const line of linesToRestore) {
+        try {
+            const prodResult = await firebaseService.getProduction(line.productionId);
+            if (prodResult.success) {
+                const prod = prodResult.data;
+                const newStock = (prod.stockQty || 0) + getNumber(line.qty);
+                const newSold = Math.max(0, (prod.soldQty || 0) - getNumber(line.qty));
+                await firebaseService.updateProduction(line.productionId, {
+                    stockQty: newStock,
+                    soldQty: newSold
+                });
+            }
+        } catch (error) {
+            // Don't let one batch failing to restore block the actual delete —
+            // log it and keep going so the sale record still gets removed.
+            console.error('Error restoring stock for production ' + line.productionId + ':', error);
+        }
+    }
+
+    // Now delete the sale itself, regardless of how the restore step went.
+    try {
+        const result = await firebaseService.deleteSale(id);
+        if (result.success) {
+            if (String(editSaleId) === String(id)) {
+                editSaleId = null;
+            }
+            selectedProductName = "";
+            document.getElementById('saleForm').reset();
+            document.getElementById('saleDate').valueAsDate = new Date();
+            document.getElementById('submitSaleBtn').innerHTML = '<i class="fas fa-save"></i> Record Sale & Deduct Stock';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            document.getElementById('editBanner').style.display = 'none';
+            showMessage('successAlert', 'Sale deleted and stock restored successfully.');
+        } else {
+            showMessage('errorAlert', 'Error deleting sale: ' + result.error);
+        }
+    } catch (error) {
+        showMessage('errorAlert', 'Error deleting sale: ' + error.message);
+    }
+};
+
+document.getElementById('saleProduct').addEventListener('input', function() {
+    selectedProductName = "";
+    showProductSuggestions(this.value);
+    updateSalePreview();
+});
+
+document.getElementById('saleProduct').addEventListener('focus', function() {
+    showProductSuggestions(this.value);
+});
+
+document.getElementById('saleProduct').addEventListener('blur', function() {
+    setTimeout(function() {
+        hideProductSuggestions();
+        validateTypedProduct();
+    }, 180);
+});
+
+document.addEventListener('click', function(event) {
+    const wrapper = event.target.closest('.autocomplete-wrap');
+    if (!wrapper) {
+        hideProductSuggestions();
+    }
+});
+
+document.getElementById('saleQty').addEventListener('input', updateSalePreview);
+document.getElementById('saleUnitPrice').addEventListener('input', updateSalePreview);
+
+document.getElementById('saleForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const typedProduct = document.getElementById('saleProduct').value.trim();
+    if (!selectedProductName || selectedProductName.toLowerCase() !== typedProduct.toLowerCase()) {
+        const isValidProduct = validateTypedProduct();
+        if (!isValidProduct) return;
+    }
+    
+    const productName = selectedProductName;
+    const qty = getNumber(document.getElementById('saleQty').value);
+    const unitPrice = getNumber(document.getElementById('saleUnitPrice').value);
+    const saleDate = document.getElementById('saleDate').value;
+    const notes = document.getElementById('saleNotes').value.trim();
+    
+    if (!productName || !saleDate || qty <= 0 || unitPrice < 0) {
+        showMessage('errorAlert', 'Please enter valid sale details.');
+        return;
+    }
+    
+    // Check stock availability
+    const stockMap = getStockByProduct();
+    const available = stockMap[productName] ? getNumber(stockMap[productName].stock) : 0;
+    if (qty > available) {
+        showMessage('errorAlert', `Not enough stock. Available only: ${available}`);
+        return;
+    }
+    
+    // Find the production to deduct from (oldest first)
+    const productionsForProduct = productions
+        .filter(p => p.prodName === productName && getNumber(p.stockQty) > 0)
+        .sort((a, b) => new Date(a.prodDate || a.timestamp || 0) - new Date(b.prodDate || b.timestamp || 0));
+    
+    if (productionsForProduct.length === 0) {
+        showMessage('errorAlert', 'No available stock for this product.');
+        return;
+    }
+    
+    // Deduct from the oldest production first
+    let remainingQty = qty;
+    let productionId = '';
+    let saleLines = [];
+    
+    for (const prod of productionsForProduct) {
+        if (remainingQty <= 0) break;
+        
+        const availableStock = getNumber(prod.stockQty);
+        const deductQty = Math.min(availableStock, remainingQty);
+        
+        if (deductQty > 0) {
+            const newStock = availableStock - deductQty;
+            const newSold = (prod.soldQty || 0) + deductQty;
+            
+            await firebaseService.updateProduction(prod.id, {
+                stockQty: newStock,
+                soldQty: newSold
+            });
+            
+            saleLines.push({
+                productionId: prod.id,
+                qty: deductQty
+            });
+            
+            remainingQty -= deductQty;
+            productionId = prod.id; // Keep the last production ID for reference
+        }
+    }
+    
+    if (remainingQty > 0) {
+        showMessage('errorAlert', `Not enough stock. Available only: ${qty - remainingQty}`);
+        return;
+    }
+    
+    const saleData = {
+        prodName: productName,
+        saleQty: qty,
+        unitPrice: unitPrice,
+        totalAmount: qty * unitPrice,
+        saleDate: saleDate,
+        notes: notes,
+        productionId: productionId,
+        saleLines: saleLines
+    };
+    
+    let result;
+    if (editSaleId !== null) {
+        // For edit, we need to restore old stock first
+        const oldSale = sales.find(s => String(s.id) === String(editSaleId));
+        if (oldSale && oldSale.saleLines) {
+            // Restore old stock
+            for (const line of oldSale.saleLines) {
+                const prodResult = await firebaseService.getProduction(line.productionId);
+                if (prodResult.success) {
+                    const prod = prodResult.data;
+                    await firebaseService.updateProduction(line.productionId, {
+                        stockQty: (prod.stockQty || 0) + getNumber(line.qty),
+                        soldQty: Math.max(0, (prod.soldQty || 0) - getNumber(line.qty))
+                    });
+                }
+            }
+        }
+        result = await firebaseService.updateSale(editSaleId, saleData);
+    } else {
+        result = await firebaseService.addSale(saleData);
+    }
+    
+    if (result.success) {
+        document.getElementById('saleForm').reset();
+        document.getElementById('saleDate').valueAsDate = new Date();
+        document.getElementById('submitSaleBtn').innerHTML = '<i class="fas fa-save"></i> Record Sale & Deduct Stock';
+        document.getElementById('cancelEditBtn').style.display = 'none';
+        document.getElementById('editBanner').style.display = 'none';
+        const wasEdit = editSaleId !== null;
+        editSaleId = null;
+        selectedProductName = "";
+        showMessage('successAlert', wasEdit ? 'Sale updated and stock adjusted successfully.' : 'Sale recorded and production stock automatically deducted.');
+    } else {
+        showMessage('errorAlert', 'Error recording sale: ' + result.error);
+    }
+});
+
+// Initialize
+if (checkAuth()) {
+    if (!document.getElementById('saleDate').value) {
+        document.getElementById('saleDate').valueAsDate = new Date();
+    }
+    loadData();
+}
+
+// Clean up listeners on page unload
+window.addEventListener('beforeunload', () => {
+    if (unsubscribeProductions) unsubscribeProductions();
+    if (unsubscribeSales) unsubscribeSales();
+}); 
+
+// Make functions globally accessible
+window.logout = logout;
+window.selectProduct = selectProduct;
+window.editSale = editSale;
+window.cancelEdit = cancelEdit;
+window.deleteSale = deleteSale;
+</script>
+</body>
+</html>

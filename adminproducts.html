@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management | MSME Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: #f0f4f8; min-height: 100vh; }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100%;
+            background: linear-gradient(180deg, #1e4b2e 0%, #0f2e1e 100%);
+            color: white;
+            z-index: 100;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header { padding: 28px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header h2 { font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
+        .sidebar-header p { font-size: 0.7rem; opacity: 0.7; margin-top: 8px; }
+        .nav-menu { padding: 24px 0; flex: 1; }
+
+        .nav-item {
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .nav-item i { width: 24px; font-size: 1.2rem; }
+
+        .user-info {
+            margin-top: auto;
+            padding: 20px 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.2);
+        }
+
+        .user-info .user-name { font-weight: 600; margin-bottom: 4px; }
+        .user-info .user-role { font-size: 0.75rem; opacity: 0.7; }
+
+        .logout-btn {
+            margin-top: 12px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .main-content { margin-left: 280px; padding: 24px; }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-title h1 { font-size: 1.8rem; color: #1f3b2c; }
+        .page-title p { color: #6c7a89; margin-top: 4px; }
+
+        .quick-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        .card {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            margin-bottom: 28px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px 28px;
+            border-bottom: 2px solid #f0f2f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .card-header h2 {
+            color: #1f3b2c;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-body { padding: 24px; }
+
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 18px;
+        }
+
+        input, select {
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            width: 100%;
+        }
+
+        input:focus, select:focus {
+            border-color: #2c7a4a;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(44,122,74,0.1);
+        }
+
+        label { font-weight: 600; font-size: 0.85rem; color: #2c3e50; margin-bottom: 8px; display: block; }
+        .form-group { margin-bottom: 18px; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 16px;
+        }
+
+        button, .btn {
+            background: #2c7a4a;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        button:hover, .btn:hover { background: #1f5e3a; transform: translateY(-2px); }
+        .btn-outline { background: white; border: 2px solid #cbd5e0; color: #2d3748; }
+        .btn-outline:hover { background: #f8fafc; border-color: #2c7a4a; color: #1f3b2c; }
+        .btn-danger { background: #dc2626; }
+        .btn-danger:hover { background: #b91c1c; }
+        .btn-warning { background: #f59e0b; }
+        .btn-warning:hover { background: #d97706; }
+        .btn-small { padding: 7px 12px; font-size: 0.8rem; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 14px 12px; text-align: left; border-bottom: 1px solid #edf2f7; vertical-align: top; }
+        th { background: #f8fafc; font-weight: 700; color: #1f3b2c; white-space: nowrap; }
+        .table-responsive { overflow-x: auto; }
+
+        .badge { background:#e2e8f0; padding:3px 8px; border-radius:20px; display:inline-block; font-size:0.8rem; }
+        .profit-positive, .stock-good { color: #2c7a4a; font-weight: 700; }
+        .profit-negative, .stock-low { color: #dc2626; font-weight: 700; }
+        .empty { text-align:center; padding:38px; color:#64748b; }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            z-index: 500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 28px;
+            max-width: 850px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.25);
+        }
+
+        .modal-header {
+            padding: 22px 28px;
+            border-bottom: 2px solid #f0f2f5;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:16px;
+        }
+
+        .modal-header h3 { color:#1f3b2c; }
+        .modal-body { padding: 24px 28px; }
+        .close-btn { background:#e2e8f0; color:#334155; padding:8px 12px; }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-user-shield"></i> Admin Panel</h2>
+            <p>MSME Production System Management</p>
+        </div>
+
+        <div class="nav-menu">
+            <a href="admindashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</a>
+            <a href="adminproducts.html" class="nav-item active"><i class="fas fa-boxes"></i> Product Management</a>
+            <a href="adminanalytics.html" class="nav-item"><i class="fas fa-chart-bar"></i> Admin Analytics</a>
+            <a href="adminreports.html" class="nav-item"><i class="fas fa-file-alt"></i> Admin Reports</a>
+            <a href="adminusers.html" class="nav-item"><i class="fas fa-users-cog"></i> User Management</a>
+        </div>
+
+        <div class="user-info">
+            <div class="user-name" id="userName">Loading...</div>
+            <div class="user-role" id="userRole">Loading...</div>
+            <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title">
+                <h1><i class="fas fa-boxes"></i> Product Management</h1>
+                <p>View, add, edit, delete production records, and manage product stock.</p>
+            </div>
+
+            <div class="quick-actions">
+                <button onclick="openProductionModal()"><i class="fas fa-plus"></i> Add Production</button>
+                <button class="btn-outline" onclick="exportProductionCSV()"><i class="fas fa-file-excel"></i> Export CSV</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-filter"></i> Search & Filter</h2>
+            </div>
+            <div class="card-body">
+                <div class="filter-bar">
+                    <div style="min-width:260px; flex:1;">
+                        <label>Search Product / Batch</label>
+                        <input type="text" id="productSearch" placeholder="Search product or batch...">
+                    </div>
+                    <div style="min-width:210px;">
+                        <label>Stock Filter</label>
+                        <select id="stockFilter">
+                            <option value="all">All Stock</option>
+                            <option value="out">Out of Stock</option>
+                            <option value="low">Low Stock (1-5)</option>
+                            <option value="available">Available Stock</option>
+                        </select>
+                    </div>
+                    <div style="min-width:180px;">
+                        <label>&nbsp;</label>
+                        <button onclick="renderProductionTable()"><i class="fas fa-search"></i> Apply</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-list"></i> Production Records</h2>
+                <div>Total: <span id="recordCount">0</span></div>
+            </div>
+            <div class="card-body table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Product</th>
+                            <th>Batch</th>
+                            <th>Produced</th>
+                            <th>Sold</th>
+                            <th>Stock</th>
+                            <th>Raw Cost</th>
+                            <th>Sell Price</th>
+                            <th>Profit</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productionTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="productionModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="productionModalTitle"><i class="fas fa-edit"></i> Edit Production</h3>
+                <button class="close-btn" onclick="closeProductionModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="productionEditForm">
+                    <input type="hidden" id="editProductionId">
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Product Name *</label>
+                            <input type="text" id="editProdName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Batch ID</label>
+                            <input type="text" id="editBatchId">
+                        </div>
+                        <div class="form-group">
+                            <label>Production Date *</label>
+                            <input type="date" id="editProdDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Output Quantity *</label>
+                            <input type="number" id="editOutputQty" step="1" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Sold Quantity</label>
+                            <input type="number" id="editSoldQty" step="1" min="0" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Remaining Stock</label>
+                            <input type="number" id="editStockQty" step="1" min="0" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Raw Material Cost *</label>
+                            <input type="number" id="editRawCost" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Selling Price per Unit *</label>
+                            <input type="number" id="editSellPrice" step="0.01" min="0" required>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:10px;">
+                        <button type="submit"><i class="fas fa-save"></i> Save Production</button>
+                        <button type="button" class="btn-outline" onclick="closeProductionModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { firebaseService } from './firebase-config.js';
+
+        let productions = [];
+        let sales = [];
+        let sessionData = null;
+        let unsubscribeProductions = null;
+        let unsubscribeSales = null;
+
+        function getNumber(value) {
+            const num = Number(value);
+            return Number.isFinite(num) ? num : 0;
+        }
+
+        function formatNumber(value) {
+            const num = getNumber(value);
+            return Number.isInteger(num) ? num.toString() : num.toFixed(2);
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, function(m) {
+                return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[m];
+            });
+        }
+
+        function checkAdminAuth() {
+            try {
+                sessionData = JSON.parse(localStorage.getItem('msme_production_session') || 'null');
+            } catch (error) {
+                sessionData = null;
+            }
+
+            if (!sessionData || !sessionData.loggedIn) {
+                window.location.href = 'login.html';
+                return false;
+            }
+
+            if (sessionData.role !== 'admin') {
+                alert('Admin access only.');
+                window.location.href = 'dashboard.html';
+                return false;
+            }
+
+            document.getElementById('userName').innerText = sessionData.name || sessionData.username || 'Admin';
+            document.getElementById('userRole').innerText = 'ADMIN';
+            return true;
+        }
+
+        function logout() {
+            localStorage.removeItem('msme_production_session');
+            window.location.href = 'login.html';
+        }
+
+        function getSoldQty(productionId) {
+            return sales.reduce((sum, s) => {
+                if (String(s.productionId) === String(productionId)) {
+                    return sum + getNumber(s.saleQty || s.qtySold);
+                }
+
+                if (Array.isArray(s.saleLines)) {
+                    return sum + s.saleLines
+                        .filter(line => String(line.productionId) === String(productionId))
+                        .reduce((lineSum, line) => lineSum + getNumber(line.qty), 0);
+                }
+
+                return sum;
+            }, 0);
+        }
+
+        function normalizeProduction(p) {
+            const outputQty = getNumber(p.outputQty);
+            const computedSold = getSoldQty(p.id);
+            const soldQty = Math.max(getNumber(p.soldQty), computedSold);
+            const stockQty = Math.max(0, outputQty - soldQty);
+
+            return { ...p, outputQty, soldQty, stockQty };
+        }
+
+        function loadData() {
+            renderProductionTable();
+        }
+
+        function renderProductionTable() {
+            const tbody = document.getElementById('productionTableBody');
+            const search = document.getElementById('productSearch').value.toLowerCase().trim();
+            const stockFilter = document.getElementById('stockFilter').value;
+
+            let filtered = [...productions];
+
+            if (search) {
+                filtered = filtered.filter(p =>
+                    String(p.prodName || '').toLowerCase().includes(search) ||
+                    String(p.batchId || '').toLowerCase().includes(search)
+                );
+            }
+
+            if (stockFilter === 'out') filtered = filtered.filter(p => getNumber(p.stockQty) <= 0);
+            if (stockFilter === 'low') filtered = filtered.filter(p => getNumber(p.stockQty) > 0 && getNumber(p.stockQty) <= 5);
+            if (stockFilter === 'available') filtered = filtered.filter(p => getNumber(p.stockQty) > 0);
+
+            filtered.sort((a, b) => new Date(b.timestamp || b.prodDate || 0) - new Date(a.timestamp || a.prodDate || 0));
+
+            document.getElementById('recordCount').innerText = filtered.length;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" class="empty">No production records found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(p => {
+                const profit = getNumber(p.profit);
+                const stock = getNumber(p.stockQty);
+
+                return `
+                    <tr>
+                        <td>${escapeHtml(p.prodDate || '')}</td>
+                        <td><strong>${escapeHtml(p.prodName || '')}</strong></td>
+                        <td><span class="badge">${escapeHtml(p.batchId || '')}</span></td>
+                        <td>${formatNumber(p.outputQty)}</td>
+                        <td>${formatNumber(p.soldQty)}</td>
+                        <td class="${stock <= 0 ? 'stock-low' : 'stock-good'}">${formatNumber(stock)}</td>
+                        <td>₱${getNumber(p.rawCost).toFixed(2)}</td>
+                        <td>₱${getNumber(p.sellPrice).toFixed(2)}</td>
+                        <td class="${profit >= 0 ? 'profit-positive' : 'profit-negative'}">₱${profit.toFixed(2)}</td>
+                        <td>
+                            <button class="btn-small btn-warning" onclick="editProduction('${String(p.id)}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn-small btn-danger" onclick="deleteProduction('${String(p.id)}')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openProductionModal() {
+            document.getElementById('productionModalTitle').innerHTML = '<i class="fas fa-plus"></i> Add Production';
+            document.getElementById('productionEditForm').reset();
+            document.getElementById('editProductionId').value = '';
+            document.getElementById('editProdDate').valueAsDate = new Date();
+            document.getElementById('editSoldQty').value = 0;
+            document.getElementById('editStockQty').value = 0;
+            document.getElementById('productionModal').style.display = 'flex';
+        }
+
+        function closeProductionModal() {
+            document.getElementById('productionModal').style.display = 'none';
+        }
+
+        function editProduction(id) {
+            const p = productions.find(item => String(item.id) === String(id));
+            if (!p) return;
+
+            document.getElementById('productionModalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Production';
+            document.getElementById('editProductionId').value = p.id;
+            document.getElementById('editProdName').value = p.prodName || '';
+            document.getElementById('editBatchId').value = p.batchId || '';
+            document.getElementById('editProdDate').value = p.prodDate || '';
+            document.getElementById('editOutputQty').value = getNumber(p.outputQty);
+            document.getElementById('editSoldQty').value = getNumber(p.soldQty);
+            document.getElementById('editStockQty').value = getNumber(p.stockQty);
+            document.getElementById('editRawCost').value = getNumber(p.rawCost).toFixed(2);
+            document.getElementById('editSellPrice').value = getNumber(p.sellPrice).toFixed(2);
+            document.getElementById('productionModal').style.display = 'flex';
+        }
+
+        function updateEditStockPreview() {
+            const output = getNumber(document.getElementById('editOutputQty').value);
+            const sold = getNumber(document.getElementById('editSoldQty').value);
+            document.getElementById('editStockQty').value = Math.max(0, output - sold);
+        }
+
+        document.getElementById('editOutputQty').addEventListener('input', updateEditStockPreview);
+
+        document.getElementById('productionEditForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('editProductionId').value;
+            const name = document.getElementById('editProdName').value.trim();
+            const batch = document.getElementById('editBatchId').value.trim() || `BATCH-${new Date().toISOString().slice(0,10)}-${Math.floor(Math.random() * 1000)}`;
+            const date = document.getElementById('editProdDate').value;
+            const output = getNumber(document.getElementById('editOutputQty').value);
+            const raw = getNumber(document.getElementById('editRawCost').value);
+            const price = getNumber(document.getElementById('editSellPrice').value);
+
+            if (!name || !date || output <= 0 || raw < 0 || price < 0) {
+                alert('Please enter valid production details.');
+                return;
+            }
+
+            const existing = productions.find(item => String(item.id) === String(id));
+            const sold = existing ? getNumber(existing.soldQty) : 0;
+
+            if (output < sold) {
+                alert(`Output quantity cannot be lower than already sold quantity (${sold}).`);
+                return;
+            }
+
+            const record = {
+                prodName: name,
+                batchId: batch,
+                prodDate: date,
+                outputQty: output,
+                soldQty: sold,
+                stockQty: output - sold,
+                rawCost: raw,
+                sellPrice: price,
+                profit: (price * output) - raw,
+                timestamp: existing ? existing.timestamp : new Date().toISOString()
+            };
+
+            let result;
+            if (existing) {
+                // Update existing production
+                result = await firebaseService.updateProduction(id, record);
+                if (result.success) {
+                    alert('Production record updated successfully.');
+                } else {
+                    alert('Error updating production: ' + result.error);
+                    return;
+                }
+            } else {
+                // Add new production
+                result = await firebaseService.addProduction(record);
+                if (result.success) {
+                    alert('Production record added successfully.');
+                } else {
+                    alert('Error adding production: ' + result.error);
+                    return;
+                }
+            }
+
+            closeProductionModal();
+            // Data will auto-update via Firebase listener
+        });
+
+        async function deleteProduction(id) {
+            const p = productions.find(item => String(item.id) === String(id));
+            if (!p) return;
+
+            const relatedSales = sales.filter(s => {
+                if (String(s.productionId) === String(id)) return true;
+                if (Array.isArray(s.saleLines)) return s.saleLines.some(line => String(line.productionId) === String(id));
+                return false;
+            });
+
+            let message = `Delete production record for ${p.prodName}?`;
+
+            if (relatedSales.length > 0) {
+                message += `\n\nThis will also delete ${relatedSales.length} related sale record(s).`;
+            }
+
+            if (!confirm(message)) return;
+
+            const result = await firebaseService.deleteProduction(id);
+            if (result.success) {
+                alert('Production record deleted. Related sales were also removed.');
+            } else {
+                alert('Error deleting production: ' + result.error);
+            }
+            // Data will auto-update via Firebase listener
+        }
+
+        function exportProductionCSV() {
+            if (productions.length === 0) {
+                alert('No production data to export.');
+                return;
+            }
+
+            const headers = ['Date','Product','Batch','Produced','Sold','Stock','Raw Cost','Selling Price','Profit'];
+            const rows = productions.map(p => [
+                p.prodDate || '',
+                p.prodName || '',
+                p.batchId || '',
+                getNumber(p.outputQty),
+                getNumber(p.soldQty),
+                getNumber(p.stockQty),
+                getNumber(p.rawCost).toFixed(2),
+                getNumber(p.sellPrice).toFixed(2),
+                getNumber(p.profit).toFixed(2)
+            ]);
+
+            const csv = [headers, ...rows]
+                .map(row => row.map(value => '"' + String(value ?? '').replace(/"/g, '""') + '"').join(','))
+                .join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `admin_productions_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize Firebase listeners
+        function initFirebaseListeners() {
+            // Listen for productions
+            unsubscribeProductions = firebaseService.listenProductions((data) => {
+                productions = data.map(normalizeProduction);
+                loadData();
+            });
+
+            // Listen for sales
+            unsubscribeSales = firebaseService.listenSales((data) => {
+                sales = data;
+                loadData();
+            });
+        }
+
+        // Clean up listeners on page unload
+        function cleanupListeners() {
+            if (unsubscribeProductions) {
+                unsubscribeProductions();
+                unsubscribeProductions = null;
+            }
+            if (unsubscribeSales) {
+                unsubscribeSales();
+                unsubscribeSales = null;
+            }
+        }
+
+        document.getElementById('productSearch').addEventListener('input', renderProductionTable);
+        document.getElementById('stockFilter').addEventListener('change', renderProductionTable);
+
+        if (checkAdminAuth()) {
+            initFirebaseListeners();
+        }
+
+        // Clean up before page unload
+        window.addEventListener('beforeunload', cleanupListeners);
+
+        // Make functions globally accessible for inline onclick
+        window.logout = logout;
+        window.openProductionModal = openProductionModal;
+        window.closeProductionModal = closeProductionModal;
+        window.editProduction = editProduction;
+        window.deleteProduction = deleteProduction;
+        window.exportProductionCSV = exportProductionCSV;
+        window.renderProductionTable = renderProductionTable;
+    </script>
+</body>
+</html>

@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Production System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e4b2e 0%, #2a6e3f 50%, #3b8a53 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 40px;
+            padding: 34px 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .system-logo-img {
+            width: 100%;
+            max-width: 330px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            object-fit: contain;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 1.1rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            border: 2px solid #e2e8f0;
+            border-radius: 28px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: #fefefe;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #2c7a4a;
+            box-shadow: 0 0 0 3px rgba(44, 122, 74, 0.1);
+        }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            font-size: 0.85rem;
+        }
+
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #6c7a89;
+        }
+
+        .remember input {
+            width: 16px;
+            height: 16px;
+            padding: 0;
+            margin: 0;
+        }
+
+        .forgot {
+            color: #2c7a4a;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button {
+            width: 100%;
+            background: #2c7a4a;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button:hover {
+            background: #1f5e3a;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(44, 122, 74, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .demo-credentials {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #6c7a89;
+        }
+
+        .demo-credentials span {
+            background: #f0f4f8;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-family: monospace;
+            margin: 0 4px;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #1e4b2e 0%, #2a6e3f 50%, #3b8a53 100%);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: white;
+            overflow: hidden;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+            animation: fadeInOverlay 0.25s ease forwards;
+        }
+
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .loader-card {
+            text-align: center;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.22);
+            backdrop-filter: blur(14px);
+            padding: 42px 38px;
+            border-radius: 34px;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.25);
+            min-width: 320px;
+            animation: loaderPop 0.5s ease forwards;
+        }
+
+        @keyframes loaderPop {
+            from {
+                opacity: 0;
+                transform: translateY(24px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .loader-logo {
+            width: 92px;
+            height: 92px;
+            margin: 0 auto 24px;
+            background: rgba(255,255,255,0.18);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .loader-logo::before {
+            content: "";
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            border: 4px solid rgba(255,255,255,0.25);
+            border-top-color: #f59e0b;
+            animation: spin 1s linear infinite;
+        }
+
+        .loader-logo img {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+            border-radius: 18px;
+            background: white;
+            padding: 4px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader-card h2 {
+            font-size: 1.45rem;
+            margin-bottom: 8px;
+            font-weight: 800;
+        }
+
+        .loader-card p {
+            opacity: 0.86;
+            font-size: 0.95rem;
+            margin-bottom: 22px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.22);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #f59e0b;
+            border-radius: 999px;
+            animation: fillBar 1.15s ease forwards;
+        }
+
+        @keyframes fillBar {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+
+        .login-card.logging-in {
+            animation: loginExit 0.35s ease forwards;
+        }
+
+        @keyframes loginExit {
+            from {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-18px) scale(0.96);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 28px 22px;
+            }
+
+            .system-logo-img {
+                max-width: 290px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loader-card">
+            <div class="loader-logo">
+                <img src="msme-logo.png" alt="MSME Production Logo">
+            </div>
+            <h2 id="loadingTitle">Logging in...</h2>
+            <p id="loadingMessage">Preparing your dashboard</p>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo">
+                <img src="msme-logo.png" alt="MSME Production Management System Logo" class="system-logo-img">
+            </div>
+
+            <div id="errorMessage" class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorText">Invalid username or password</span>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Username or Email</label>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" placeholder="Enter your username or email" required autocomplete="username" autocapitalize="off" spellcheck="false">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
+                    </div>
+                </div>
+
+                <div class="remember-forgot">
+                    <label class="remember">
+                        <input type="checkbox" id="rememberMe"> Remember me
+                    </label>
+                    <a href="#" class="forgot" onclick="showDemoAlert(); return false;">Forgot password?</a>
+                </div>
+
+                <button type="submit" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Login to Dashboard
+                </button>
+            </form>
+
+            <div class="demo-credentials">
+                <p>Demo Credentials:</p>
+                <p>
+                    <span>admin</span> / <span>admin123</span> &nbsp;|&nbsp;
+                    <span>user</span> / <span>user123</span> &nbsp;|&nbsp;
+                    <span>manager</span> / <span>manager123</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { firebaseService } from './firebase-config.js';
+
+        const defaultUsers = [
+            { username: "admin", password: "admin123", role: "admin", name: "Administrator", email: "admin@msme.com" },
+            { username: "user", password: "user123", role: "user", name: "Production Staff", email: "user@msme.com" },
+            { username: "manager", password: "manager123", role: "manager", name: "Production Manager", email: "manager@msme.com" }
+        ];
+
+        // Store default users in localStorage if not exists
+        function initializeDefaultUsers() {
+            const storedUsers = JSON.parse(localStorage.getItem('msme_users') || '[]');
+            if (storedUsers.length === 0) {
+                localStorage.setItem('msme_users', JSON.stringify(defaultUsers));
+                return defaultUsers;
+            }
+            
+            // Ensure default users exist
+            let updated = false;
+            defaultUsers.forEach(defaultUser => {
+                if (!storedUsers.some(u => u.username === defaultUser.username)) {
+                    storedUsers.push(defaultUser);
+                    updated = true;
+                }
+            });
+            if (updated) {
+                localStorage.setItem('msme_users', JSON.stringify(storedUsers));
+            }
+            return storedUsers;
+        }
+
+        // Initialize default users
+        initializeDefaultUsers();
+
+        function showDemoAlert() {
+            alert(
+                "Demo Credentials:\n\n" +
+                "Admin:\nUsername: admin\nPassword: admin123\n\n" +
+                "User:\nUsername: user\nPassword: user123\n\n" +
+                "Manager:\nUsername: manager\nPassword: manager123"
+            );
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById("errorMessage");
+            const errorText = document.getElementById("errorText");
+            errorText.innerText = message;
+            errorDiv.style.display = "flex";
+            setTimeout(() => { 
+                errorDiv.style.display = "none"; 
+            }, 4000);
+        }
+
+        function saveSession(user) {
+            const session = {
+                username: user.username,
+                name: user.name,
+                role: user.role,
+                loggedIn: true,
+                uid: user.uid,
+                loginTime: new Date().toISOString()
+            };
+            localStorage.setItem("msme_production_session", JSON.stringify(session));
+            
+            if (document.getElementById("rememberMe").checked) {
+                localStorage.setItem("msme_production_remember", user.username);
+            } else {
+                localStorage.removeItem("msme_production_remember");
+            }
+        }
+
+        function showLoadingScreen(role) {
+            const loginCard = document.querySelector(".login-card");
+            const overlay = document.getElementById("loadingOverlay");
+            const title = document.getElementById("loadingTitle");
+            const message = document.getElementById("loadingMessage");
+            
+            if (role === "admin") {
+                title.innerText = "Welcome, Admin!";
+                message.innerText = "Loading admin dashboard...";
+            } else if (role === "manager") {
+                title.innerText = "Welcome, Manager!";
+                message.innerText = "Loading manager dashboard...";
+            } else {
+                title.innerText = "Welcome!";
+                message.innerText = "Loading your dashboard...";
+            }
+            
+            loginCard.classList.add("logging-in");
+            overlay.classList.add("show");
+        }
+
+        function redirectByRole(role, useAnimation = true) {
+            const destination = role === "admin" ? "admindashboard.html" : "dashboard.html";
+            if (!useAnimation) {
+                window.location.href = destination;
+                return;
+            }
+            showLoadingScreen(role);
+            setTimeout(() => { 
+                window.location.href = destination; 
+            }, 1300);
+        }
+
+        // Get user email from username
+        function getUserEmail(username) {
+            const users = JSON.parse(localStorage.getItem('msme_users') || '[]');
+            const foundUser = users.find(u => u.username === username);
+            if (foundUser && foundUser.email) {
+                return foundUser.email;
+            }
+            // Try to construct email
+            return username + '@msme.com';
+        }
+
+        // Handle login form submission
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            const loginBtn = document.getElementById("loginBtn");
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+            
+            if (!username || !password) {
+                showError("Please enter both username and password.");
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Dashboard';
+                return;
+            }
+            
+            // Try Firebase authentication first
+            let user = null;
+            let email = username;
+            
+            // Check if username is an email
+            if (!email.includes('@')) {
+                email = getUserEmail(username);
+            }
+            
+            try {
+                const result = await firebaseService.loginUser(email, password);
+                if (result.success) {
+                    user = {
+                        username: username,
+                        name: result.user.name || username,
+                        role: result.user.role || 'user',
+                        uid: result.user.uid
+                    };
+                    saveSession(user);
+                    
+                    // Sync with localStorage for backward compatibility
+                    const users = JSON.parse(localStorage.getItem('msme_users') || '[]');
+                    const existingUser = users.find(u => u.username === username);
+                    if (!existingUser) {
+                        users.push({
+                            username: username,
+                            password: password,
+                            role: user.role,
+                            name: user.name,
+                            email: email,
+                            uid: user.uid
+                        });
+                        localStorage.setItem('msme_users', JSON.stringify(users));
+                    } else {
+                        // Update user data
+                        existingUser.role = user.role;
+                        existingUser.name = user.name;
+                        existingUser.email = email;
+                        existingUser.uid = user.uid;
+                        localStorage.setItem('msme_users', JSON.stringify(users));
+                    }
+                    
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Dashboard';
+                    redirectByRole(user.role);
+                    return;
+                } else {
+                    console.warn('Firebase login failed:', result.error);
+                }
+            } catch (error) {
+                console.warn('Firebase login error:', error);
+            }
+            
+            // Fallback to localStorage authentication
+            const users = JSON.parse(localStorage.getItem('msme_users') || '[]');
+            const localUser = users.find(u => u.username === username && u.password === password);
+            
+            if (localUser) {
+                user = {
+                    username: localUser.username,
+                    name: localUser.name || localUser.username,
+                    role: localUser.role || 'user',
+                    uid: localUser.uid || Date.now().toString()
+                };
+                saveSession(user);
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Dashboard';
+                redirectByRole(user.role);
+            } else {
+                // Check if user exists but password is wrong
+                const userExists = users.some(u => u.username === username);
+                if (userExists) {
+                    showError("Incorrect password. Please try again.");
+                } else {
+                    showError("Invalid username or password. Please try again.");
+                }
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Dashboard';
+            }
+        });
+
+        // Check for existing session on page load
+        (function checkExistingSession() {
+            try {
+                const session = localStorage.getItem("msme_production_session");
+                if (session) {
+                    const sessionData = JSON.parse(session);
+                    if (sessionData.loggedIn) {
+                        redirectByRole(sessionData.role, false);
+                    }
+                }
+            } catch (error) {
+                localStorage.removeItem("msme_production_session");
+            }
+        })();
+
+        // Restore remembered username
+        (function restoreRemembered() {
+            const remembered = localStorage.getItem("msme_production_remember");
+            if (remembered) {
+                document.getElementById("username").value = remembered;
+                document.getElementById("rememberMe").checked = true;
+            }
+        })();
+
+        // Make functions globally accessible
+        window.showDemoAlert = showDemoAlert;
+        window.redirectByRole = redirectByRole;
+        window.showError = showError;
+    </script>
+</body>
+</html>

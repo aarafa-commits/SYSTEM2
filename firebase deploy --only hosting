@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============ HELPER FUNCTIONS ============
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return request.auth != null && request.auth.token.role == 'admin';
+    }
+    
+    function isManager() {
+      return request.auth != null && request.auth.token.role == 'manager';
+    }
+    
+    function isUser() {
+      return request.auth != null && request.auth.token.role == 'user';
+    }
+    
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    // ============ USERS COLLECTION ============
+    
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow create: if isSignedIn() && (isAdmin() || isOwner(userId));
+      allow delete: if isAdmin();
+    }
+    
+    // ============ PRODUCTIONS COLLECTION ============
+    
+    match /productions/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+    
+    // ============ SALES COLLECTION ============
+    
+    match /sales/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isSignedIn();
+    }
+    
+    // ============ RAW MATERIALS COLLECTION ============
+    
+    match /rawMaterials/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (isAdmin() || isManager());
+      allow delete: if isAdmin();
+    }
+    
+    // ============ AUDIT LOGS COLLECTION ============
+    
+    match /auditLogs/{docId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}

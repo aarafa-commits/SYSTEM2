@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migrate Data to Firebase</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body {
+            background: linear-gradient(135deg, #1e4b2e 0%, #2a6e3f 50%, #3b8a53 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 28px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+        h1 { color: #1f3b2c; margin-bottom: 8px; }
+        p { color: #6c7a89; margin-bottom: 24px; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 16px;
+            text-align: center;
+        }
+        .stat-number { font-size: 2rem; font-weight: 800; color: #2c7a4a; }
+        .stat-label { color: #6c7a89; font-size: 0.85rem; }
+        button {
+            background: #2c7a4a;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+            transition: 0.2s;
+        }
+        button:hover { background: #1f5e3a; transform: translateY(-2px); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .progress {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        .progress .log-item {
+            padding: 6px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+        }
+        .success { color: #2c7a4a; }
+        .error { color: #dc2626; }
+        .warning { color: #f59e0b; }
+        .info { color: #2563eb; }
+        .login-box {
+            background: #fef3c7;
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border-left: 4px solid #f59e0b;
+        }
+        .login-box .status { font-weight: 600; }
+        .login-box .email { color: #2c7a4a; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-database"></i> Data Migration Tool</h1>
+        <p>Migrate your localStorage data to Firebase Firestore.</p>
+
+        <div class="login-box" id="loginStatus">
+            <div class="status" id="authStatus">🔍 Checking login status...</div>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="prodCount">0</div>
+                <div class="stat-label">Productions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="salesCount">0</div>
+                <div class="stat-label">Sales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="usersCount">0</div>
+                <div class="stat-label">Users</div>
+            </div>
+        </div>
+
+        <button id="migrateBtn" onclick="startMigration()">
+            <i class="fas fa-upload"></i> Start Migration
+        </button>
+
+        <div class="progress" id="progress">
+            <h3><i class="fas fa-list"></i> Migration Log</h3>
+            <div id="logContainer"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { firebaseService } from './firebase-config.js';
+
+        function getNumber(value) {
+            const num = Number(value);
+            return Number.isFinite(num) ? num : 0;
+        }
+
+        function getArray(key) {
+            try {
+                const data = JSON.parse(localStorage.getItem(key) || '[]');
+                return Array.isArray(data) ? data : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function getDefaultUsers() {
+            return [
+                { username: "admin", password: "admin123", role: "admin", name: "Administrator" },
+                { username: "user", password: "user123", role: "user", name: "Production Staff" },
+                { username: "manager", password: "manager123", role: "manager", name: "Production Manager" }
+            ];
+        }
+
+        function ensureUsers() {
+            const stored = getArray('msme_users');
+            const merged = [...stored];
+            const defaultUsers = getDefaultUsers();
+
+            defaultUsers.forEach(defaultUser => {
+                if (!merged.some(u => u.username === defaultUser.username)) {
+                    merged.push(defaultUser);
+                }
+            });
+
+            return merged;
+        }
+
+        // Show stats
+        const productions = getArray('msme_productions');
+        const sales = getArray('msme_sales');
+        const users = ensureUsers();
+
+        document.getElementById('prodCount').innerText = productions.length;
+        document.getElementById('salesCount').innerText = sales.length;
+        document.getElementById('usersCount').innerText = users.length;
+
+        // Check login status
+        async function checkAuth() {
+            const statusDiv = document.getElementById('authStatus');
+            const currentUser = firebaseService.auth.currentUser;
+            
+            if (currentUser) {
+                statusDiv.innerHTML = `✅ Logged in as: <span class="email">${currentUser.email}</span>`;
+                document.getElementById('loginStatus').style.borderColor = '#22c55e';
+                document.getElementById('loginStatus').style.background = '#dcfce7';
+                return true;
+            } else {
+                statusDiv.innerHTML = '⚠️ Not logged in. Please login to migrate data.';
+                document.getElementById('loginStatus').style.borderColor = '#f59e0b';
+                document.getElementById('loginStatus').style.background = '#fef3c7';
+                
+                // Try auto-login with admin credentials
+                statusDiv.innerHTML = '🔄 Attempting auto-login...';
+                try {
+                    const result = await firebaseService.loginUser('admin@msme.com', 'admin123');
+                    if (result.success) {
+                        statusDiv.innerHTML = `✅ Auto-login successful! Logged in as: <span class="email">admin@msme.com</span>`;
+                        document.getElementById('loginStatus').style.borderColor = '#22c55e';
+                        document.getElementById('loginStatus').style.background = '#dcfce7';
+                        return true;
+                    }
+                } catch (error) {
+                    statusDiv.innerHTML = '❌ Auto-login failed. Please login manually at the main site first.';
+                    return false;
+                }
+                return false;
+            }
+        }
+
+        let isLoggedIn = false;
+
+        window.startMigration = async function() {
+            const btn = document.getElementById('migrateBtn');
+            const progressDiv = document.getElementById('progress');
+            const logContainer = document.getElementById('logContainer');
+
+            // Check login again
+            isLoggedIn = await checkAuth();
+            if (!isLoggedIn) {
+                alert('Please login to the main site first, then come back to migrate data.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Migrating...';
+            progressDiv.style.display = 'block';
+            logContainer.innerHTML = '';
+
+            function addLog(message, type = '') {
+                const div = document.createElement('div');
+                div.className = `log-item ${type}`;
+                div.innerHTML = message;
+                logContainer.appendChild(div);
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+
+            addLog('📋 Starting migration...', 'info');
+
+            try {
+                // Migrate Productions
+                if (productions.length > 0) {
+                    addLog(`📦 Migrating ${productions.length} productions...`, 'info');
+                    let prodSuccess = 0;
+                    for (const prod of productions) {
+                        try {
+                            const { id, ...prodData } = prod;
+                            const result = await firebaseService.addProduction(prodData);
+                            if (result.success) {
+                                prodSuccess++;
+                                if (prodSuccess % 5 === 0) {
+                                    addLog(`   ✅ ${prodSuccess} productions migrated...`, 'success');
+                                }
+                            }
+                        } catch (error) {
+                            addLog(`❌ Error: ${error.message}`, 'error');
+                        }
+                    }
+                    addLog(`✅ ${prodSuccess} productions migrated successfully!`, 'success');
+                } else {
+                    addLog('ℹ️ No productions found to migrate.', 'info');
+                }
+
+                // Migrate Sales
+                if (sales.length > 0) {
+                    addLog(`💰 Migrating ${sales.length} sales...`, 'info');
+                    let saleSuccess = 0;
+                    for (const sale of sales) {
+                        try {
+                            const { id, ...saleData } = sale;
+                            const result = await firebaseService.addSale(saleData);
+                            if (result.success) {
+                                saleSuccess++;
+                                if (saleSuccess % 5 === 0) {
+                                    addLog(`   ✅ ${saleSuccess} sales migrated...`, 'success');
+                                }
+                            }
+                        } catch (error) {
+                            addLog(`❌ Error: ${error.message}`, 'error');
+                        }
+                    }
+                    addLog(`✅ ${saleSuccess} sales migrated successfully!`, 'success');
+                } else {
+                    addLog('ℹ️ No sales found to migrate.', 'info');
+                }
+
+                addLog('🎉 Migration completed successfully!', 'success');
+                addLog('📌 Refresh your main site to see the migrated data.', 'info');
+
+            } catch (error) {
+                addLog(`❌ Migration failed: ${error.message}`, 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check"></i> Migration Complete';
+        };
+
+        // Check auth on load
+        checkAuth();
+    </script>
+</body>
+</html>
