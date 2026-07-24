@@ -3,11 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Production System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>MSME Production Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
     <style>
+        :root {
+            --primary: #2c7a4a;
+            --primary-dark: #1f5e3a;
+            --primary-darker: #1f3b2c;
+            --accent: #f59e0b;
+            --bg-body: #f0f4f8;
+            --text-main: #2d3748;
+            --text-muted: #6c7a89;
+            --border-color: #e2e8f0;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -15,627 +25,1138 @@
             font-family: 'Inter', sans-serif;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #1e4b2e 0%, #2a6e3f 50%, #3b8a53 100%);
+            background: var(--bg-body);
+            color: var(--text-main);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-body);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ===== ANIMATIONS ===== */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.2s; }
+        .delay-3 { transition-delay: 0.3s; }
+        .delay-4 { transition-delay: 0.4s; }
+        .delay-5 { transition-delay: 0.5s; }
+        .delay-6 { transition-delay: 0.6s; }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+            z-index: 1000;
+            padding: 0 5%;
+            height: 76px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(44, 122, 74, 0.06);
+            transition: all 0.3s ease;
         }
 
-        .login-container {
-            width: 100%;
-            max-width: 500px;
+        .navbar.scrolled {
+            box-shadow: 0 4px 30px rgba(0,0,0,0.08);
+            height: 68px;
         }
 
-        .login-card {
-            background: white;
-            border-radius: 40px;
-            padding: 34px 40px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            animation: fadeInUp 0.5s ease;
+        .navbar .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            transition: transform 0.3s ease;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .navbar .logo:hover {
+            transform: scale(1.02);
         }
 
-        .logo {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .system-logo-img {
-            width: 100%;
-            max-width: 330px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
+        .navbar .logo img {
+            height: 40px;
+            width: auto;
             object-fit: contain;
         }
 
-        .form-group {
-            margin-bottom: 24px;
+        .navbar .logo .logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
         }
 
-        label {
-            display: block;
+        .navbar .logo .logo-text .brand {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--primary-darker);
+            letter-spacing: -0.5px;
+        }
+
+        .navbar .logo .logo-text .brand span {
+            color: var(--primary);
+        }
+
+        .navbar .logo .logo-text .sub {
+            font-size: 0.55rem;
             font-weight: 600;
-            font-size: 0.85rem;
-            color: #2c3e50;
-            margin-bottom: 8px;
+            color: var(--text-muted);
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
         }
 
-        .input-group {
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 500;
+            transition: 0.3s;
+            font-size: 0.95rem;
             position: relative;
         }
 
-        .input-group i {
+        .nav-links a::after {
+            content: '';
             position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #9ca3af;
-            font-size: 1.1rem;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: 0.3s ease;
+            border-radius: 4px;
         }
 
-        input {
+        .nav-links a:hover::after {
             width: 100%;
-            padding: 14px 16px 14px 48px;
-            border: 2px solid #e2e8f0;
-            border-radius: 28px;
-            font-size: 1rem;
-            transition: all 0.2s;
-            background: #fefefe;
         }
 
-        input:focus {
-            outline: none;
-            border-color: #2c7a4a;
-            box-shadow: 0 0 0 3px rgba(44, 122, 74, 0.1);
+        .nav-links a:hover {
+            color: var(--primary);
         }
 
-        .remember-forgot {
-            display: flex;
-            justify-content: space-between;
+        .btn-login {
+            background: var(--primary);
+            color: white !important;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(44, 122, 74, 0.2);
+        }
+
+        .btn-login::after {
+            display: none !important;
+        }
+
+        .btn-login:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: c;
+            color: white !important;
+        }
+
+        .hamburger {
+            display: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: var(--primary-darker);
+            transition: 0.3s;
+            padding: 8px;
+        }
+
+        .hamburger:hover {
+            color: var(--primary);
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            padding: 130px 5% 80px;
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 50px;
             align-items: center;
-            margin-bottom: 24px;
-            font-size: 0.85rem;
+            min-height: 100vh;
+            position: relative;
         }
 
-        .remember {
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            right: -5%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(44, 122, 74, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #dcfce7;
+            color: #166534;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 6px 16px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 20px;
+            border: 1px solid #86efac;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(2.4rem, 4.5vw, 3.6rem);
+            font-weight: 900;
+            color: var(--primary-darker);
+            line-height: 1.12;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .hero-content h1 .highlight {
+            color: var(--primary);
+            position: relative;
+            display: inline-block;
+        }
+
+        .hero-content p {
+            font-size: clamp(1rem, 1.5vw, 1.15rem);
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 30px;
+        }
+
+        .hero-content .features-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 32px;
+        }
+
+        .hero-content .features-list span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            background: white;
+            padding: 8px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            transition: 0.3s;
+        }
+
+        .hero-content .features-list span:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        .hero-content .features-list span i {
+            color: var(--primary);
+            font-size: 0.75rem;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary-custom {
+            background: var(--primary);
+            color: white;
+            padding: 14px 32px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 6px 20px rgba(44, 122, 74, 0.25);
+        }
+
+        .btn-primary-custom:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(44, 122, 74, 0.35);
+        }
+
+        .btn-secondary-custom {
+            background: white;
+            color: var(--text-main);
+            padding: 14px 32px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 700;
+            border: 2px solid var(--border-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-secondary-custom:hover {
+            border-color: var(--primary);
+            color: var(--primary-darker);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+        }
+
+        .hero-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-image .illustration {
+            width: 100%;
+            max-width: 480px;
+            background: linear-gradient(145deg, #ffffff, #f0f7f2);
+            border-radius: 36px;
+            padding: 45px 30px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(44, 122, 74, 0.1);
+            border: 1px solid rgba(44, 122, 74, 0.08);
+            position: relative;
+            overflow: hidden;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .hero-image .illustration .logo-big {
+            width: 140px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-image .illustration .icon-float {
+            position: absolute;
+            font-size: 2rem;
+            color: var(--primary);
+            opacity: 0.08;
+            z-index: 0;
+        }
+
+        .hero-image .illustration .icon-float:nth-child(1) { top: 20px; left: 20px; }
+        .hero-image .illustration .icon-float:nth-child(2) { bottom: 20px; right: 20px; }
+
+        .hero-image .illustration h3 {
+            color: var(--primary-darker);
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-image .illustration p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-image .illustration .divider {
+            width: 50px;
+            height: 3px;
+            background: var(--primary);
+            margin: 14px auto;
+            border-radius: 4px;
+        }
+
+        /* ===== STATS SECTION ===== */
+        .stats {
+            padding: 60px 5%;
+            background: linear-gradient(135deg, var(--primary-darker), var(--primary-dark));
+            color: white;
+        }
+
+        .stats-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            text-align: center;
+        }
+
+        .stat-item .number {
+            font-size: clamp(2.5rem, 4vw, 3.2rem);
+            font-weight: 900;
+            display: block;
+            color: var(--accent);
+            line-height: 1.1;
+        }
+
+        .stat-item .label {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            margin-top: 6px;
+        }
+
+        /* ===== FEATURES SECTION ===== */
+        .features {
+            padding: 90px 5%;
+            background: white;
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-header h2 {
+            font-size: clamp(2.1rem, 3.5vw, 2.8rem);
+            font-weight: 800;
+            color: var(--primary-darker);
+            letter-spacing: -0.5px;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            margin-top: 8px;
+        }
+
+        .section-header .line {
+            width: 60px;
+            height: 4px;
+            background: var(--primary);
+            margin: 16px auto;
+            border-radius: 4px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .feature-card {
+            background: #f8fafc;
+            padding: 35px 28px;
+            border-radius: 20px;
+            transition: 0.3s;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card .icon-wrapper {
+            width: 56px;
+            height: 56px;
+            background: #dcfce7;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            transition: 0.3s ease;
+        }
+
+        .feature-card:hover .icon-wrapper {
+            background: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .feature-card:hover .icon-wrapper i {
+            color: white;
+        }
+
+        .feature-card .icon-wrapper i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            transition: 0.3s ease;
+        }
+
+        .feature-card .number {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: rgba(44, 122, 74, 0.03);
+            pointer-events: none;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(44, 122, 74, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+            background: white;
+        }
+
+        .feature-card h3 {
+            color: var(--primary-darker);
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* ===== HOW IT WORKS ===== */
+        .how-it-works {
+            padding: 90px 5%;
+            background: #f8fafc;
+        }
+
+        .how-it-works-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .step-card {
+            text-align: center;
+            padding: 35px 25px;
+            background: white;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+            border-color: var(--primary);
+        }
+
+        .step-card .step-number {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 0 auto 20px;
+            box-shadow: 0 6px 20px rgba(44, 122, 74, 0.25);
+        }
+
+        .step-card h3 {
+            color: var(--primary-darker);
+            font-size: 1.15rem;
+            margin-bottom: 10px;
+        }
+
+        .step-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* ===== CONTACT / CTA SECTION ===== */
+        .contact {
+            padding: 90px 5%;
+            background: linear-gradient(135deg, var(--primary-darker), var(--primary-dark));
+            color: white;
+            text-align: center;
+        }
+
+        .contact-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .contact-container h2 {
+            font-size: clamp(2.2rem, 3.5vw, 2.8rem);
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .contact-container p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .contact-container .btn-white {
+            background: white;
+            color: var(--primary-darker);
+            padding: 14px 40px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .contact-container .btn-white:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+            background: #f8fafc;
+        }
+
+        .contact-info {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            opacity: 0.85;
+            font-size: 0.95rem;
+        }
+
+        .contact-info .item {
             display: flex;
             align-items: center;
             gap: 8px;
-            color: #6c7a89;
         }
 
-        .remember input {
-            width: 16px;
-            height: 16px;
-            padding: 0;
-            margin: 0;
+        .contact-info .item i {
+            color: var(--accent);
         }
 
-        .forgot {
-            color: #2c7a4a;
-            text-decoration: none;
-            cursor: pointer;
+        /* ===== FOOTER ===== */
+        .footer {
+            background: #0f2e1e;
+            color: rgba(255,255,255,0.7);
+            padding: 50px 5%;
+            text-align: center;
         }
 
-        button {
-            width: 100%;
-            background: #2c7a4a;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
+        .footer .logo-footer {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
+            margin-bottom: 12px;
         }
 
-        button:hover {
-            background: #1f5e3a;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(44, 122, 74, 0.3);
-        }
-
-        button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .error-message {
-            background: #fee2e2;
-            color: #dc2626;
-            padding: 12px;
-            border-radius: 16px;
-            margin-bottom: 20px;
-            font-size: 0.85rem;
-            display: none;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .demo-credentials {
-            margin-top: 24px;
-            padding-top: 24px;
-            border-top: 1px solid #e2e8f0;
-            text-align: center;
-            font-size: 0.8rem;
-            color: #6c7a89;
-        }
-
-        .demo-credentials span {
-            background: #f0f4f8;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-family: monospace;
-            margin: 0 4px;
-        }
-
-        .loading-overlay {
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(135deg, #1e4b2e 0%, #2a6e3f 50%, #3b8a53 100%);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            color: white;
-            overflow: hidden;
-        }
-
-        .loading-overlay.show {
-            display: flex;
-            animation: fadeInOverlay 0.25s ease forwards;
-        }
-
-        @keyframes fadeInOverlay {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .loader-card {
-            text-align: center;
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.22);
-            backdrop-filter: blur(14px);
-            padding: 42px 38px;
-            border-radius: 34px;
-            box-shadow: 0 25px 70px rgba(0,0,0,0.25);
-            min-width: 320px;
-            animation: loaderPop 0.5s ease forwards;
-        }
-
-        @keyframes loaderPop {
-            from {
-                opacity: 0;
-                transform: translateY(24px) scale(0.96);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .loader-logo {
-            width: 92px;
-            height: 92px;
-            margin: 0 auto 24px;
-            background: rgba(255,255,255,0.18);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .loader-logo::before {
-            content: "";
-            position: absolute;
-            inset: -8px;
-            border-radius: 50%;
-            border: 4px solid rgba(255,255,255,0.25);
-            border-top-color: #f59e0b;
-            animation: spin 1s linear infinite;
-        }
-
-        .loader-logo img {
-            width: 72px;
-            height: 72px;
+        .footer .logo-footer img {
+            height: 36px;
+            width: auto;
             object-fit: contain;
-            border-radius: 18px;
-            background: white;
-            padding: 4px;
+            filter: brightness(0) invert(1);
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loader-card h2 {
-            font-size: 1.45rem;
-            margin-bottom: 8px;
+        .footer .logo-footer .brand {
+            font-size: 1.1rem;
             font-weight: 800;
+            color: white;
         }
 
-        .loader-card p {
-            opacity: 0.86;
-            font-size: 0.95rem;
-            margin-bottom: 22px;
+        .footer .logo-footer .brand span {
+            color: var(--accent);
         }
 
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(255,255,255,0.22);
-            border-radius: 999px;
-            overflow: hidden;
+        .footer p {
+            font-size: 0.85rem;
+            opacity: 0.8;
         }
 
-        .progress-fill {
-            width: 0%;
-            height: 100%;
-            background: #f59e0b;
-            border-radius: 999px;
-            animation: fillBar 1.15s ease forwards;
+        .footer .links {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
         }
 
-        @keyframes fillBar {
-            from { width: 0%; }
-            to { width: 100%; }
+        .footer .links a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            transition: 0.3s;
+            font-size: 0.9rem;
         }
 
-        .login-card.logging-in {
-            animation: loginExit 0.35s ease forwards;
+        .footer .links a:hover {
+            color: white;
         }
 
-        @keyframes loginExit {
-            from {
-                opacity: 1;
-                transform: translateY(0) scale(1);
+        /* ===== MOBILE RESPONSIVE MEDIA QUERIES ===== */
+        @media (max-width: 992px) {
+            .hero {
+                grid-template-columns: 1fr;
+                text-align: center;
+                padding-top: 110px;
+                gap: 40px;
             }
-            to {
-                opacity: 0;
-                transform: translateY(-18px) scale(0.96);
+
+            .hero-content p {
+                max-width: 100%;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .hero-content .features-list {
+                justify-content: center;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+
+            .hero-image .illustration {
+                max-width: 400px;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 20px;
+                height: 70px;
+            }
+
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: white;
+                padding: 24px;
+                box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+                gap: 16px;
+                border-bottom: 3px solid var(--primary);
+                text-align: center;
+            }
+
+            .nav-links.open {
+                display: flex;
+                animation: slideDown 0.3s ease forwards;
+            }
+            
+            @keyframes slideDown {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .hero {
+                padding-top: 100px;
+            }
+
+            .features, .how-it-works, .contact {
+                padding: 70px 20px;
+            }
+
+            .contact-info {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
             }
         }
 
         @media (max-width: 480px) {
-            .login-card {
-                padding: 28px 22px;
+            .hero-buttons {
+                flex-direction: column;
+                width: 100%;
             }
 
-            .system-logo-img {
-                max-width: 290px;
+            .btn-primary-custom,
+            .btn-secondary-custom {
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
 </head>
-
 <body>
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loader-card">
-            <div class="loader-logo">
-                <img src="msme-logo.png" alt="MSME Production Logo">
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="logo">
+            <img src="msme-logo.png" alt="MSME Logo">
+            <div class="logo-text">
+                <span class="brand">MSME <span>Production</span></span>
+                <span class="sub">Management System</span>
             </div>
-            <h2 id="loadingTitle">Logging in...</h2>
-            <p id="loadingMessage">Preparing your dashboard</p>
-            <div class="progress-bar">
-                <div class="progress-fill"></div>
+        </a>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+        </ul>
+
+        <div class="hamburger" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </div>
+    </nav>
+
+    <!-- ===== HOME / HERO SECTION ===== -->
+    <section class="hero" id="home">
+        <div class="hero-content fade-in">
+            <div class="badge"><i class="fas fa-rocket"></i> Smart Production Management</div>
+            <h1>
+                Streamline Your<br>
+                <span class="highlight">Production Management</span>
+            </h1>
+            <p>
+                A complete production management system for MSMEs. Track production, manage sales, monitor stock, and generate reports — all in one place.
+            </p>
+            <div class="features-list">
+                <span><i class="fas fa-check-circle"></i> Real-time Tracking</span>
+                <span><i class="fas fa-check-circle"></i> Automated Reports</span>
+                <span><i class="fas fa-check-circle"></i> Stock Alerts</span>
+                <span><i class="fas fa-check-circle"></i> Role-Based Access</span>
+            </div>
+            <div class="hero-buttons">
+                <a href="login.html" class="btn-primary-custom">
+                    <i class="fas fa-rocket"></i> Get Started
+                </a>
+                <a href="#features" class="btn-secondary-custom">
+                    <i class="fas fa-info-circle"></i> Learn More
+                </a>
             </div>
         </div>
-    </div>
 
-    <div class="login-container">
-        <div class="login-card">
-            <div class="logo">
-                <img src="msme-logo.png" alt="MSME Production Management System Logo" class="system-logo-img">
-            </div>
-
-            <div id="errorMessage" class="error-message">
-                <i class="fas fa-exclamation-circle"></i>
-                <span id="errorText">Invalid username or password</span>
-            </div>
-
-            <form id="loginForm">
-                <div class="form-group">
-                    <label><i class="fas fa-user"></i> Username or Email</label>
-                    <div class="input-group">
-                        <i class="fas fa-user"></i>
-                        <input type="text" id="username" placeholder="Enter your username or email" required autocomplete="username" autocapitalize="off" spellcheck="false">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label><i class="fas fa-lock"></i> Password</label>
-                    <div class="input-group">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
-                    </div>
-                </div>
-
-                <div class="remember-forgot">
-                    <label class="remember">
-                        <input type="checkbox" id="rememberMe"> Remember me
-                    </label>
-                    <a href="#" class="forgot" onclick="showDemoAlert(); return false;">Forgot password?</a>
-                </div>
-
-                <button type="submit" id="loginBtn">
-                    <i class="fas fa-sign-in-alt"></i> Login to Dashboard
-                </button>
-            </form>
-
-            <div class="demo-credentials">
-                <p>Demo Credentials:</p>
-                <p>
-                    <span>admin</span> / <span>admin123</span> &nbsp;|&nbsp;
-                    <span>user</span> / <span>user123</span> &nbsp;|&nbsp;
-                    <span>manager</span> / <span>manager123</span>
-                </p>
+        <div class="hero-image fade-in delay-2">
+            <div class="illustration">
+                <i class="fas fa-chart-line icon-float"></i>
+                <i class="fas fa-box icon-float"></i>
+                <img src="msme-logo.png" alt="MSME Logo" class="logo-big">
+                <h3>MSME Production System</h3>
+                <div class="divider"></div>
+                <p>Manage your production, sales, and inventory efficiently</p>
             </div>
         </div>
-    </div>
+    </section>
 
-    <script type="module">
-        import { firebaseService } from './firebase-config.js';
+    <!-- ===== STATS SECTION ===== -->
+    <section class="stats fade-in delay-1" id="stats">
+        <div class="stats-container">
+            <div class="stat-item">
+                <span class="number" id="statBatches">0</span>
+                <span class="label">Production Batches</span>
+            </div>
+            <div class="stat-item">
+                <span class="number" id="statProducts">0</span>
+                <span class="label">Products Managed</span>
+            </div>
+            <div class="stat-item">
+                <span class="number" id="statSales">0</span>
+                <span class="label">Sales Recorded</span>
+            </div>
+            <div class="stat-item">
+                <span class="number" id="statUsers">0</span>
+                <span class="label">Active Users</span>
+            </div>
+        </div>
+    </section>
 
-        const defaultUsers = [
-            { username: "admin", password: "admin123", role: "admin", name: "Administrator", email: "admin@msme.com" },
-            { username: "user", password: "user123", role: "user", name: "Production Staff", email: "user@msme.com" },
-            { username: "manager", password: "manager123", role: "manager", name: "Production Manager", email: "manager@msme.com" }
-        ];
+    <!-- ===== FEATURES SECTION ===== -->
+    <section class="features" id="features">
+        <div class="features-container">
+            <div class="section-header fade-in">
+                <h2>Powerful Features</h2>
+                <div class="line"></div>
+                <p>Everything you need to manage your production efficiently</p>
+            </div>
 
-        // Store default users in localStorage if not exists
-        function initializeDefaultUsers() {
-            const storedUsers = JSON.parse(localStorage.getItem('msme_users') || '[]');
-            if (storedUsers.length === 0) {
-                localStorage.setItem('msme_users', JSON.stringify(defaultUsers));
-                return defaultUsers;
-            }
-            
-            // Ensure default users exist
-            let updated = false;
-            defaultUsers.forEach(defaultUser => {
-                if (!storedUsers.some(u => u.username === defaultUser.username)) {
-                    storedUsers.push(defaultUser);
-                    updated = true;
+            <div class="features-grid">
+                <div class="feature-card fade-in delay-1">
+                    <span class="number">01</span>
+                    <div class="icon-wrapper"><i class="fas fa-plus-circle"></i></div>
+                    <h3>Record Production</h3>
+                    <p>Easily record production batches with raw materials, costs, and quantities accurately mapped.</p>
+                </div>
+
+                <div class="feature-card fade-in delay-2">
+                    <span class="number">02</span>
+                    <div class="icon-wrapper"><i class="fas fa-cash-register"></i></div>
+                    <h3>Record Sales</h3>
+                    <p>Track sales, deduct stock automatically, and efficiently manage your customer orders.</p>
+                </div>
+
+                <div class="feature-card fade-in delay-3">
+                    <span class="number">03</span>
+                    <div class="icon-wrapper"><i class="fas fa-chart-bar"></i></div>
+                    <h3>Analytics Dashboard</h3>
+                    <p>Visualize production trends, profit margins, and sales performance seamlessly.</p>
+                </div>
+
+                <div class="feature-card fade-in delay-4">
+                    <span class="number">04</span>
+                    <div class="icon-wrapper"><i class="fas fa-warehouse"></i></div>
+                    <h3>Stock Management</h3>
+                    <p>Monitor inventory levels in real-time and automatically get alerts for low stock items.</p>
+                </div>
+
+                <div class="feature-card fade-in delay-5">
+                    <span class="number">05</span>
+                    <div class="icon-wrapper"><i class="fas fa-file-alt"></i></div>
+                    <h3>Intelligent Reports</h3>
+                    <p>Generate detailed, exportable reports for robust production, sales, and stock analysis.</p>
+                </div>
+
+                <div class="feature-card fade-in delay-6">
+                    <span class="number">06</span>
+                    <div class="icon-wrapper"><i class="fas fa-users-cog"></i></div>
+                    <h3>User Management</h3>
+                    <p>Manage users with highly secure role-based access control (Admin, Manager, User).</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== HOW IT WORKS ===== -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="how-it-works-container">
+            <div class="section-header fade-in">
+                <h2>How It Works</h2>
+                <div class="line"></div>
+                <p>Simple 3-step process to get started</p>
+            </div>
+
+            <div class="steps-grid">
+                <div class="step-card fade-in delay-1">
+                    <div class="step-number">1</div>
+                    <h3>Record Production</h3>
+                    <p>Add your production batches with raw materials, costs, and quantities.</p>
+                </div>
+
+                <div class="step-card fade-in delay-2">
+                    <div class="step-number">2</div>
+                    <h3>Record Sales</h3>
+                    <p>Track sales and automatically deduct stock from your active inventory.</p>
+                </div>
+
+                <div class="step-card fade-in delay-3">
+                    <div class="step-number">3</div>
+                    <h3>Monitor & Analyze</h3>
+                    <p>View real-time analytics, reports, and intelligent stock alerts.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CONTACT / CTA SECTION ===== -->
+    <section class="contact" id="contact">
+        <div class="contact-container fade-in">
+            <h2>Ready to Get Started?</h2>
+            <p>Join hundreds of MSMEs using our production management system to streamline their operations.</p>
+
+            <a href="login.html" class="btn-white">
+                <i class="fas fa-arrow-right"></i> Login to Dashboard
+            </a>
+
+            <div class="contact-info">
+                <div class="item">
+                    <i class="fas fa-envelope"></i>
+                    <span>support@msmesystem.com</span>
+                </div>
+                <div class="item">
+                    <i class="fas fa-phone"></i>
+                    <span>+63 (2) 8123 4567</span>
+                </div>
+                <div class="item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Manila, Philippines</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="logo-footer fade-in">
+            <img src="msme-logo.png" alt="MSME Logo">
+            <span class="brand">MSME <span>Production</span></span>
+        </div>
+        <p class="fade-in">&copy; 2026 MSME Production Management System. All rights reserved.</p>
+        <div class="links fade-in delay-1">
+            <a href="#home">Home</a>
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#contact">Contact</a>
+            <a href="login.html">Login</a>
+        </div>
+    </footer>
+
+    <script>
+        // ===== Mobile Menu Toggle =====
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('open');
+        }
+
+        // ===== Close menu on link click =====
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navLinks').classList.remove('open');
+            });
+        });
+
+        // ===== Smooth Scroll for Anchor Links =====
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
                 }
             });
-            if (updated) {
-                localStorage.setItem('msme_users', JSON.stringify(storedUsers));
-            }
-            return storedUsers;
-        }
+        });
 
-        // Initialize default users
-        initializeDefaultUsers();
-
-        function showDemoAlert() {
-            alert(
-                "Demo Credentials:\n\n" +
-                "Admin:\nUsername: admin\nPassword: admin123\n\n" +
-                "User:\nUsername: user\nPassword: user123\n\n" +
-                "Manager:\nUsername: manager\nPassword: manager123"
-            );
-        }
-
-        function showError(message) {
-            const errorDiv = document.getElementById("errorMessage");
-            const errorText = document.getElementById("errorText");
-            errorText.innerText = message;
-            errorDiv.style.display = "flex";
-            setTimeout(() => { 
-                errorDiv.style.display = "none"; 
-            }, 4000);
-        }
-
-        function saveSession(user) {
-            const session = {
-                username: user.username,
-                name: user.name,
-                role: user.role,
-                loggedIn: true,
-                uid: user.uid,
-                loginTime: new Date().toISOString()
-            };
-            localStorage.setItem("msme_production_session", JSON.stringify(session));
-            
-            if (document.getElementById("rememberMe").checked) {
-                localStorage.setItem("msme_production_remember", user.username);
+        // ===== Navbar Background on Scroll =====
+        const navbar = document.querySelector('.navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
             } else {
-                localStorage.removeItem("msme_production_remember");
-            }
-        }
-
-        function showLoadingScreen(role) {
-            const loginCard = document.querySelector(".login-card");
-            const overlay = document.getElementById("loadingOverlay");
-            const title = document.getElementById("loadingTitle");
-            const message = document.getElementById("loadingMessage");
-            
-            if (role === "admin") {
-                title.innerText = "Welcome, Admin!";
-                message.innerText = "Loading admin dashboard...";
-            } else if (role === "manager") {
-                title.innerText = "Welcome, Manager!";
-                message.innerText = "Loading manager dashboard...";
-            } else {
-                title.innerText = "Welcome!";
-                message.innerText = "Loading your dashboard...";
-            }
-            
-            loginCard.classList.add("logging-in");
-            overlay.classList.add("show");
-        }
-
-        function redirectByRole(role, useAnimation = true) {
-            const destination = role === "admin" ? "admindashboard.html" : "dashboard.html";
-            if (!useAnimation) {
-                window.location.href = destination;
-                return;
-            }
-            showLoadingScreen(role);
-            setTimeout(() => { 
-                window.location.href = destination; 
-            }, 1300);
-        }
-
-        // Get user email from username
-        function getUserEmail(username) {
-            const users = JSON.parse(localStorage.getItem('msme_users') || '[]');
-            const foundUser = users.find(u => u.username === username);
-            if (foundUser && foundUser.email) {
-                return foundUser.email;
-            }
-            // Try to construct email
-            return username + '@msme.com';
-        }
-
-        // Handle login form submission
-        document.getElementById("loginForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            
-            const loginBtn = document.getElementById("loginBtn");
-            loginBtn.disabled = true;
-            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
-            
-            const username = document.getElementById("username").value.trim();
-            const password = document.getElementById("password").value.trim();
-            
-            if (!username || !password) {
-                showError("Please enter both username and password.");
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Dashboard';
-                return;
-            }
-            
-            // Try Firebase authentication first
-            let user = null;
-            let email = username;
-            
-            // Check if username is an email
-            if (!email.includes('@')) {
-                email = getUserEmail(username);
-            }
-            
-            try {
-                const result = await firebaseService.loginUser(email, password);
-                if (result.success) {
-                    user = {
-                        username: username,
-                        name: result.user.name || username,
-                        role: result.user.role || 'user',
-                        uid: result.user.uid
-                    };
-                    saveSession(user);
-                    
-                    // Sync with localStorage for backward compatibility
-                    const users = JSON.parse(localStorage.getItem('msme_users') || '[]');
-                    const existingUser = users.find(u => u.username === username);
-                    if (!existingUser) {
-                        users.push({
-                            username: username,
-                            password: password,
-                            role: user.role,
-                            name: user.name,
-                            email: email,
-                            uid: user.uid
-                        });
-                        localStorage.setItem('msme_users', JSON.stringify(users));
-                    } else {
-                        // Update user data
-                        existingUser.role = user.role;
-                        existingUser.name = user.name;
-                        existingUser.email = email;
-                        existingUser.uid = user.uid;
-                        localStorage.setItem('msme_users', JSON.stringify(users));
-                    }
-                    
-                    loginBtn.disabled = false;
-                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Dashboard';
-                    redirectByRole(user.role);
-                    return;
-                } else {
-                    console.warn('Firebase login failed:', result.error);
-                }
-            } catch (error) {
-                console.warn('Firebase login error:', error);
-            }
-            
-            // Fallback to localStorage authentication
-            const users = JSON.parse(localStorage.getItem('msme_users') || '[]');
-            const localUser = users.find(u => u.username === username && u.password === password);
-            
-            if (localUser) {
-                user = {
-                    username: localUser.username,
-                    name: localUser.name || localUser.username,
-                    role: localUser.role || 'user',
-                    uid: localUser.uid || Date.now().toString()
-                };
-                saveSession(user);
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Dashboard';
-                redirectByRole(user.role);
-            } else {
-                // Check if user exists but password is wrong
-                const userExists = users.some(u => u.username === username);
-                if (userExists) {
-                    showError("Incorrect password. Please try again.");
-                } else {
-                    showError("Invalid username or password. Please try again.");
-                }
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Dashboard';
+                navbar.classList.remove('scrolled');
             }
         });
 
-        // Check for existing session on page load
-        (function checkExistingSession() {
-            try {
-                const session = localStorage.getItem("msme_production_session");
-                if (session) {
-                    const sessionData = JSON.parse(session);
-                    if (sessionData.loggedIn) {
-                        redirectByRole(sessionData.role, false);
+        // ===== Animated Statistics =====
+        function animateStats() {
+            const stats = [
+                { id: 'statBatches', target: 156, suffix: '' },
+                { id: 'statProducts', target: 48, suffix: '+' },
+                { id: 'statSales', target: 329, suffix: '' },
+                { id: 'statUsers', target: 24, suffix: '+' }
+            ];
+
+            stats.forEach(stat => {
+                const el = document.getElementById(stat.id);
+                let current = 0;
+                const increment = Math.ceil(stat.target / 40);
+                const interval = setInterval(() => {
+                    current += increment;
+                    if (current >= stat.target) {
+                        current = stat.target;
+                        clearInterval(interval);
+                    }
+                    el.textContent = current + stat.suffix;
+                }, 40);
+            });
+        }
+
+        // ===== Intersection Observer for Stats & Fade-Ins =====
+        const observerOptions = {
+            threshold: 0.15,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    if (entry.target.classList.contains('fade-in')) {
+                        entry.target.classList.add('visible');
+                    }
+                    
+                    if (entry.target.id === 'stats' && !entry.target.dataset.animated) {
+                        entry.target.dataset.animated = true;
+                        animateStats();
                     }
                 }
-            } catch (error) {
-                localStorage.removeItem("msme_production_session");
-            }
-        })();
+            });
+        }, observerOptions);
 
-        // Restore remembered username
-        (function restoreRemembered() {
-            const remembered = localStorage.getItem("msme_production_remember");
-            if (remembered) {
-                document.getElementById("username").value = remembered;
-                document.getElementById("rememberMe").checked = true;
-            }
-        })();
+        document.addEventListener('DOMContentLoaded', () => {
+            const statsSection = document.getElementById('stats');
+            if(statsSection) observer.observe(statsSection);
 
-        // Make functions globally accessible
-        window.showDemoAlert = showDemoAlert;
-        window.redirectByRole = redirectByRole;
-        window.showError = showError;
+            document.querySelectorAll('.fade-in').forEach(el => {
+                observer.observe(el);
+            });
+            
+            setTimeout(() => {
+                document.querySelectorAll('.hero .fade-in').forEach(el => {
+                    el.classList.add('visible');
+                });
+            }, 100);
+        });
     </script>
 </body>
 </html>

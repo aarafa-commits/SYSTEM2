@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Admin Access</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body {
+            background: linear-gradient(135deg, #1e4b2e 0%, #2a6e3f 50%, #1e4b2e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            z-index: 0;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        .shape-1 {
+            width: 500px;
+            height: 500px;
+            top: -100px;
+            left: -150px;
+            animation-delay: 0s;
+        }
+
+        .shape-2 {
+            width: 400px;
+            height: 400px;
+            bottom: -100px;
+            right: -100px;
+            animation-delay: -4s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-30px) scale(1.05); }
+            100% { transform: translateY(0) scale(1); }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 48px 44px;
+            max-width: 650px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .icon-circle {
+            width: 64px;
+            height: 64px;
+            background: #dcfce7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 2rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1f3b2c;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            color: #6c7a89;
+            font-size: 0.95rem;
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .status {
+            padding: 14px 18px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            display: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status.success { 
+            background: #dcfce7; 
+            color: #166534; 
+            display: flex;
+            border-left: 4px solid #22c55e;
+        }
+        .status.error { 
+            background: #fee2e2; 
+            color: #991b1b; 
+            display: flex;
+            border-left: 4px solid #dc2626;
+        }
+        .status.info { 
+            background: #e3f2fd; 
+            color: #1e40af; 
+            display: flex;
+            border-left: 4px solid #2563eb;
+        }
+        .status.warning { 
+            background: #fef3c7; 
+            color: #92400e; 
+            display: flex;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .status i {
+            font-size: 1.2rem;
+        }
+
+        button {
+            background: linear-gradient(135deg, #2c7a4a, #1f5e3a);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 6px 20px rgba(44, 122, 74, 0.25);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(44, 122, 74, 0.35);
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #2c7a4a;
+            border: 2px solid #2c7a4a;
+            box-shadow: none;
+            margin-top: 12px;
+        }
+
+        .btn-secondary:hover {
+            background: #2c7a4a;
+            color: white;
+            box-shadow: 0 6px 20px rgba(44, 122, 74, 0.2);
+        }
+
+        .log {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 14px;
+            max-height: 250px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            display: none;
+            border: 1px solid #e2e8f0;
+        }
+
+        .log::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .log::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .log::-webkit-scrollbar-thumb {
+            background: #2c7a4a;
+            border-radius: 10px;
+        }
+
+        .log-header {
+            font-weight: 700;
+            color: #1f3b2c;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .log-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.85rem;
+        }
+
+        .log-item:last-child {
+            border-bottom: none;
+        }
+
+        .log-item.success { color: #2c7a4a; }
+        .log-item.error { color: #dc2626; }
+        .log-item.warning { color: #f59e0b; }
+        .log-item.info { color: #2563eb; }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 32px 24px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .icon-circle {
+                width: 52px;
+                height: 52px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
+    <div class="container">
+        <div class="icon-circle">🔧</div>
+        <h1>Fix Admin Access</h1>
+        <p class="subtitle">This tool will fix your admin account so you can login.</p>
+
+        <div id="status" class="status info">
+            <i class="fas fa-info-circle"></i>
+            <span id="statusText">Click the button below to fix admin access.</span>
+        </div>
+
+        <button id="fixBtn" onclick="fixAdmin()">
+            <i class="fas fa-wrench"></i> Fix Admin Access
+        </button>
+
+        <div class="log" id="logContainer">
+            <div class="log-header">
+                <i class="fas fa-list"></i> Activity Log
+            </div>
+            <div id="logEntries"></div>
+        </div>
+
+        <div class="footer-text">
+            <i class="fas fa-shield-alt"></i> This tool will update your admin account status
+        </div>
+    </div>
+
+    <script type="module">
+        import { firebaseService, db, COLLECTIONS } from './firebase-config.js';
+        import { doc, setDoc, getDoc, getDocs, query, where, collection, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+        const statusDiv = document.getElementById('status');
+        const statusText = document.getElementById('statusText');
+        const logContainer = document.getElementById('logContainer');
+        const logEntries = document.getElementById('logEntries');
+
+        function addLog(message, type = '') {
+            const div = document.createElement('div');
+            div.className = `log-item ${type}`;
+            div.textContent = message;
+            logEntries.appendChild(div);
+            logContainer.style.display = 'block';
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function setStatus(message, type = 'info') {
+            statusDiv.className = `status ${type}`;
+            statusText.textContent = message;
+        }
+
+        window.fixAdmin = async function() {
+            const btn = document.getElementById('fixBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            logContainer.style.display = 'block';
+            logEntries.innerHTML = '';
+            setStatus('Processing...', 'info');
+
+            try {
+                // Check if user is logged in
+                const currentUser = firebaseService.auth.currentUser;
+                if (!currentUser) {
+                    setStatus('Please login first!', 'warning');
+                    addLog('❌ You are not logged in. Please login first.', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-wrench"></i> Fix Admin Access';
+                    return;
+                }
+
+                addLog(`✅ Logged in as: ${currentUser.email}`, 'success');
+
+                // Check for admin user in Firestore
+                const usersRef = collection(db, COLLECTIONS.USERS);
+                const q = query(usersRef, where('username', '==', 'admin'));
+                const querySnapshot = await getDocs(q);
+                
+                let adminDoc = null;
+                let adminDocId = null;
+
+                querySnapshot.forEach((doc) => {
+                    adminDoc = doc.data();
+                    adminDocId = doc.id;
+                });
+
+                if (adminDoc) {
+                    addLog('✅ Found admin user in Firestore', 'success');
+                    
+                    // Check and update both role and status
+                    const updates = {};
+                    let needsUpdate = false;
+
+                    if (adminDoc.role !== 'admin') {
+                        updates.role = 'admin';
+                        needsUpdate = true;
+                        addLog('📝 Admin role needs to be updated to "admin"', 'warning');
+                    }
+
+                    if (adminDoc.status !== 'approved') {
+                        updates.status = 'approved';
+                        needsUpdate = true;
+                        addLog('📝 Admin status needs to be updated to "approved"', 'warning');
+                    }
+
+                    if (needsUpdate) {
+                        updates.updatedAt = new Date().toISOString();
+                        await updateDoc(doc(db, COLLECTIONS.USERS, adminDocId), updates);
+                        addLog('✅ Admin account updated successfully!', 'success');
+                    } else {
+                        addLog('✅ Admin account is already correct (role: admin, status: approved)', 'success');
+                    }
+                } else {
+                    addLog('⚠️ Admin user not found in Firestore. Creating...', 'warning');
+                    
+                    // Create admin document with proper role and status
+                    const adminData = {
+                        username: 'admin',
+                        name: 'Administrator',
+                        email: 'admin@msme.com',
+                        role: 'admin',
+                        status: 'approved',
+                        password: 'admin123',
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    await setDoc(doc(collection(db, COLLECTIONS.USERS)), adminData);
+                    addLog('✅ Admin user created in Firestore (role: admin, status: approved)', 'success');
+                }
+
+                // Update localStorage session
+                const session = JSON.parse(localStorage.getItem('msme_production_session') || '{}');
+                if (session.username === 'admin') {
+                    session.role = 'admin';
+                    localStorage.setItem('msme_production_session', JSON.stringify(session));
+                    addLog('✅ Session updated with admin role', 'success');
+                }
+
+                // Update localStorage users
+                const storedUsers = JSON.parse(localStorage.getItem('msme_users') || '[]');
+                const adminIndex = storedUsers.findIndex(u => u.username === 'admin');
+                if (adminIndex >= 0) {
+                    storedUsers[adminIndex].role = 'admin';
+                    storedUsers[adminIndex].status = 'approved';
+                    localStorage.setItem('msme_users', JSON.stringify(storedUsers));
+                    addLog('✅ localStorage users updated', 'success');
+                }
+
+                setStatus('✅ Admin access fixed successfully!', 'success');
+                addLog('🎉 Admin access fixed successfully!', 'success');
+                addLog('📌 Login with: admin / admin123', 'info');
+                addLog('📌 Visit: admindashboard.html', 'info');
+
+            } catch (error) {
+                addLog(`❌ Error: ${error.message}`, 'error');
+                setStatus(`❌ Error: ${error.message}`, 'error');
+                console.error('Fix admin error:', error);
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check"></i> Fix Complete';
+        };
+
+        // Auto-run check
+        setTimeout(() => {
+            setStatus('Click the button below to fix your admin account.', 'info');
+        }, 1000);
+
+        // Make functions globally accessible
+        window.fixAdmin = fixAdmin;
+    </script>
+</body>
+</html>

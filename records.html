@@ -3,342 +3,451 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Production Records | MSME Production System Management</title>
+    <title>Production Records | MSME Production</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: #f0f4f8; min-height: 100vh; }
+        :root {
+            --primary: #15803d;
+            --primary-hover: #166534;
+            --primary-light: #dcfce7;
+            --secondary: #0f172a;
+            --accent: #f59e0b;
+            --bg-body: #f1f5f9;
+            --bg-surface: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        body { background: var(--bg-body); color: var(--text-dark); min-height: 100vh; overflow-x: hidden; }
         
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* ===== SIDEBAR ===== */
         .sidebar {
             position: fixed;
             left: 0;
             top: 0;
             width: 280px;
             height: 100%;
-            background: linear-gradient(180deg, #1e4b2e 0%, #0f2e1e 100%);
+            background: linear-gradient(180deg, #064e3b 0%, #022c22 100%);
             color: white;
-            z-index: 100;
-            overflow-y: auto;
+            transition: var(--transition);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 24px rgba(0,0,0,0.08);
         }
 
         .sidebar-header {
-            padding: 28px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 32px 24px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .sidebar-header h2 {
-            font-size: 1.3rem;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-header h2 i { 
+            color: var(--accent); 
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-header p {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .sidebar-close-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        .nav-menu { padding: 20px 0; flex-grow: 1; overflow-y: auto; }
+        
+        .nav-item {
+            padding: 12px 20px;
+            margin: 6px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.06);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
+        }
+
+        .nav-item i { width: 22px; font-size: 1.1rem; text-align: center; opacity: 0.8; }
+        .nav-item.active i { opacity: 1; }
+
+        .user-info {
+            padding: 24px;
+            background: rgba(0,0,0,0.3);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .user-name { font-weight: 700; margin-bottom: 4px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+        .user-name i { color: var(--primary-light); }
+        .user-role { font-size: 0.75rem; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; margin-left: 22px; }
+
+        .logout-btn {
+            margin-top: 16px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #e2e8f0;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: #ef4444; border-color: #ef4444; color: white; transform: translateY(-2px);
+        }
+
+        /* ===== MOBILE HEADER & HAMBURGER ===== */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 20px;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 900;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mobile-header .brand-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--secondary);
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .sidebar-header p {
-            font-size: 0.7rem;
-            opacity: 0.7;
-            margin-top: 8px;
-        }
-
-        .nav-menu { padding: 24px 0; }
-
-        .nav-item {
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: rgba(255,255,255,0.8);
-            text-decoration: none;
-        }
-
-        .nav-item:hover,
-        .nav-item.active {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border-left: 4px solid #f59e0b;
-        }
-
-        .nav-item i {
-            width: 24px;
+        .hamburger-btn {
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            color: var(--secondary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
             font-size: 1.2rem;
         }
 
-        .user-info {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 20px 24px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.2);
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 950;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        .user-info .user-name {
-            font-weight: 600;
-            margin-bottom: 4px;
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
         }
 
-        .user-info .user-role {
-            font-size: 0.75rem;
-            opacity: 0.7;
-        }
-
-        .logout-btn {
-            margin-top: 12px;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            width: 100%;
-        }
-        
+        /* ===== MAIN CONTENT ===== */
         .main-content {
             margin-left: 280px;
-            padding: 24px;
+            padding: clamp(20px, 4vw, 40px);
+            max-width: 1600px;
+            transition: var(--transition);
         }
 
         .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 28px;
-            flex-wrap: wrap;
-            gap: 16px;
+            display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; flex-wrap: wrap; gap: 20px;
         }
 
         .page-title h1 {
-            font-size: 1.8rem;
-            color: #1f3b2c;
+            font-size: clamp(1.8rem, 3vw, 2.2rem); color: var(--secondary); font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px;
         }
 
         .back-btn {
-            background: #e2e8f0;
-            padding: 10px 20px;
-            border-radius: 40px;
+            background: var(--bg-surface);
+            padding: 12px 20px;
+            border-radius: 12px;
             text-decoration: none;
-            color: #2d3748;
+            color: var(--secondary);
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
         }
         
-        .card {
-            background: white;
-            border-radius: 28px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-            overflow: hidden;
-            margin-bottom: 28px;
+        .back-btn:hover {
+            border-color: #cbd5e1; box-shadow: var(--shadow-md); transform: translateY(-2px);
         }
 
-        .card-header {
-            padding: 20px 28px;
-            border-bottom: 2px solid #f0f2f5;
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--bg-surface);
+            border-radius: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 40px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .card:hover { box-shadow: var(--shadow-md); }
+
+        .card-header { 
+            padding: 24px clamp(20px, 3vw, 32px); 
+            border-bottom: 1px solid var(--border-color); 
+            background: rgba(248, 250, 252, 0.5); 
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 16px;
         }
-
-        .card-header h2 {
-            color: #1f3b2c;
-        }
-
-        .card-body { padding: 24px; }
         
+        .card-header h2 { color: var(--secondary); font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+        .card-header h2 i { color: var(--primary); background: var(--primary-light); padding: 8px; border-radius: 8px; }
+        
+        .card-body { padding: clamp(20px, 3vw, 32px); }
+        
+        /* ===== FILTER BAR ===== */
         .filter-bar {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-bottom: 24px;
-            align-items: flex-end;
+            display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; align-items: flex-end;
         }
 
         .filter-bar input,
         .filter-bar select {
             padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
             min-width: 180px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            background: var(--bg-body);
+            transition: var(--transition);
         }
 
-        th,
-        td {
-            padding: 14px 12px;
-            text-align: left;
-            border-bottom: 1px solid #edf2f7;
-            vertical-align: top;
+        .filter-bar input:focus, .filter-bar select:focus {
+            border-color: var(--primary);
+            outline: none;
+            background: var(--bg-surface);
+            box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.1);
         }
+
+        .filter-bar input[type="text"] { flex-grow: 1; }
+        
+        button {
+            border: none; padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition); box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+        .btn-outline { background: var(--bg-surface); color: var(--secondary); border: 2px solid var(--border-color); box-shadow: none; }
+        .btn-outline:hover { background: var(--bg-body); border-color: #cbd5e1; }
+
+        .export-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        /* ===== TABLE ===== */
+        .table-responsive { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-color); width: 100%; }
+        
+        table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+
+        th, td { padding: 16px 20px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
 
         th {
-            background: #f8fafc;
-            font-weight: 700;
-            color: #1f3b2c;
-            cursor: pointer;
-            white-space: nowrap;
+            background: #f8fafc; font-weight: 600; color: var(--text-muted); cursor: pointer; white-space: nowrap; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; transition: var(--transition);
         }
 
-        th:hover { background: #e2e8f0; }
+        th:hover { background: #f1f5f9; color: var(--text-dark); }
+        
+        tbody tr { transition: var(--transition); }
+        tbody tr:hover { background-color: #f8fafc; }
 
-        .profit-positive {
-            color: #2c7a4a;
-            font-weight: 700;
-        }
-
-        .profit-negative {
-            color: #dc2626;
-            font-weight: 700;
-        }
-
-        .stock-good {
-            color: #2c7a4a;
-            font-weight: 700;
-        }
-
-        .stock-low {
-            color: #dc2626;
-            font-weight: 700;
-        }
-
-        .badge {
-            background: #e2e8f0;
-            padding: 2px 8px;
-            border-radius: 20px;
-            display: inline-block;
-            font-size: 0.8rem;
-        }
-
-        .raw-materials-list {
-            font-size: 0.8rem;
-            color: #2d3748;
-            line-height: 1.5;
-            max-width: 260px;
-        }
-
-        .raw-materials-list ul {
-            margin-left: 16px;
-        }
-
-        .raw-empty {
-            color: #94a3b8;
-            font-style: italic;
-            font-size: 0.8rem;
+        /* Image Thumbnail */
+        .img-thumbnail {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+            background: var(--bg-body);
         }
         
-        .pagination {
+        .img-placeholder {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background: var(--bg-body);
+            color: var(--text-muted);
             display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin-top: 24px;
-            flex-wrap: wrap;
+            border: 1px dashed #cbd5e0;
+            font-size: 1.2rem;
         }
 
+        /* Badges */
+        .badge { padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; letter-spacing: 0.3px; }
+        .badge-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .badge-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .badge-neutral { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+
+        .raw-materials-list { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; max-width: 260px; }
+        .raw-materials-list ul { margin-left: 16px; }
+        .raw-empty { color: #94a3b8; font-style: italic; font-size: 0.85rem; }
+        
+        .btn-danger-icon {
+            background: #fee2e2; color: #dc2626; border: none; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); box-shadow: none; padding: 0;
+        }
+        .btn-danger-icon:hover { background: #ef4444; color: white; transform: scale(1.05); }
+
+        /* ===== PAGINATION ===== */
+        .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 24px; flex-wrap: wrap; }
+        
         .page-btn {
-            padding: 8px 16px;
-            background: #e2e8f0;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
+            padding: 8px 16px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--secondary); border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: none;
         }
+        .page-btn:hover:not(:disabled) { background: var(--bg-body); border-color: #cbd5e1; }
+        .page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .page-btn.active {
-            background: #2c7a4a;
-            color: white;
-        }
-
-        .page-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .export-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .btn-outline {
-            background: white;
-            border: 2px solid #cbd5e0;
-            color: #2d3748;
-            padding: 8px 16px;
-            border-radius: 40px;
-            cursor: pointer;
-        }
-
-        .btn-outline:hover {
-            border-color: #2c7a4a;
-            background: #f8fafc;
-        }
-
-        .btn-danger {
-            background: #dc2626;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-        }
-
-        .btn-danger:hover {
-            background: #b91c1c;
-        }
-        
-        @media (max-width: 768px) {
+        /* ===== RESPONSIVE MEDIA QUERIES ===== */
+        @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); }
-            .main-content { margin-left: 0; }
-            .table-responsive { overflow-x: auto; }
-            table { min-width: 1200px; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-close-btn { display: block; }
+            .mobile-header { display: flex; }
+            .main-content {
+                margin-left: 0;
+                padding-top: calc(70px + clamp(20px, 4vw, 40px));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-bar { flex-direction: column; align-items: flex-start; }
+            .top-bar .back-btn { width: 100%; justify-content: center; }
+            .filter-bar input, .filter-bar select, .filter-bar button { width: 100%; }
+            .card-header, .card-body { padding: 20px; }
         }
     </style>
 </head>
 
 <body>
-    <div class="sidebar">
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="brand-title">
+            <i class="fas fa-industry" style="color: var(--primary);"></i> MSME Production
+        </div>
+        <button class="hamburger-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h2><i class="fas fa-chart-line"></i> MSME Production</h2>
-            <p>Management System</p>
+            <h2><i class="fas fa-industry"></i> MSME Production</h2>
+            <button class="sidebar-close-btn" onclick="toggleSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div style="padding: 0 24px 16px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <p>Management Workspace</p>
         </div>
 
         <div class="nav-menu">
-            <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
+            <a href="dashboard.html" class="nav-item" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-th-large"></i> Dashboard
             </a>
-
-            <a href="production.html" class="nav-item">
-                <i class="fas fa-plus-circle"></i> Record Production
+            <a href="production.html" class="nav-item" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-hammer"></i> Record Production
             </a>
-
-            <a href="sales.html" class="nav-item">
-                <i class="fas fa-cash-register"></i> Record Sale
+            <a href="sales.html" class="nav-item" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-file-invoice-dollar"></i> Record Sale
             </a>
-
-            <a href="analytics.html" class="nav-item">
-                <i class="fas fa-chart-bar"></i> Analytics
+            <a href="analytics.html" class="nav-item" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-chart-pie"></i> Analytics
             </a>
-
-            <a href="records.html" class="nav-item active">
-                <i class="fas fa-database"></i> Production Records
+            <a href="records.html" class="nav-item active" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-archive"></i> Production Records
             </a>
-
-            <a href="reports.html" class="nav-item">
-                <i class="fas fa-file-alt"></i> Reports
+            <a href="reports.html" class="nav-item" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-chart-line"></i> Reports
             </a>
         </div>
 
         <div class="user-info">
-            <div class="user-name" id="userName">Loading...</div>
+            <div class="user-name" id="userName"><i class="fas fa-user-circle"></i> Loading...</div>
             <div class="user-role" id="userRole">Loading...</div>
             <button class="logout-btn" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> Logout
+                <i class="fas fa-sign-out-alt"></i> Sign Out
             </button>
         </div>
     </div>
@@ -346,9 +455,9 @@
     <div class="main-content">
         <div class="top-bar">
             <div class="page-title">
-                <h1><i class="fas fa-database"></i> Production Records</h1>
+                <h1>Production Records</h1>
+                <p>View, filter, and export your entire production history and inventory status.</p>
             </div>
-
             <a href="dashboard.html" class="back-btn">
                 <i class="fas fa-arrow-left"></i> Back to Dashboard
             </a>
@@ -360,23 +469,20 @@
 
                 <div class="export-buttons">
                     <button class="btn-outline" onclick="exportCSV()">
-                        <i class="fas fa-file-excel"></i> Export CSV
+                        <i class="fas fa-file-csv"></i> Export CSV
                     </button>
-
                     <button class="btn-outline" onclick="exportJSON()">
-                        <i class="fas fa-file-code"></i> Export JSON
+                        <i class="fas fa-code"></i> Export JSON
                     </button>
                 </div>
             </div>
 
             <div class="card-body">
                 <div class="filter-bar">
-                    <input type="text" id="searchInput" placeholder="🔍 Search by product, batch, or raw material...">
-
-                    <input type="date" id="dateFrom" placeholder="From Date">
-
-                    <input type="date" id="dateTo" placeholder="To Date">
-
+                    <input type="text" id="searchInput" placeholder="Search by product, batch, or material...">
+                    <input type="date" id="dateFrom" title="From Date">
+                    <input type="date" id="dateTo" title="To Date">
+                    
                     <select id="sortBy">
                         <option value="date_desc">Date (Newest First)</option>
                         <option value="date_asc">Date (Oldest First)</option>
@@ -387,12 +493,11 @@
                         <option value="stock_asc">Stock (Lowest)</option>
                     </select>
 
-                    <button id="applyFilters" style="background:#2c7a4a; color:white; border:none; padding: 10px 20px; border-radius: 40px; cursor:pointer;">
-                        Apply Filters
+                    <button id="applyFilters" class="btn-primary">
+                        <i class="fas fa-filter"></i> Apply
                     </button>
-
                     <button id="resetFilters" class="btn-outline">
-                        Reset
+                        <i class="fas fa-undo"></i> Reset
                     </button>
                 </div>
             </div>
@@ -400,8 +505,10 @@
         
         <div class="card">
             <div class="card-header">
-                <h2><i class="fas fa-list"></i> All Production Records</h2>
-                <div>Total: <span id="totalRecords">0</span> records</div>
+                <h2><i class="fas fa-list-ul"></i> All Production Records</h2>
+                <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 600;">
+                    Total: <span id="totalRecords" style="color: var(--primary);">0</span> records
+                </div>
             </div>
 
             <div class="card-body">
@@ -409,20 +516,20 @@
                     <table id="recordsTable">
                         <thead>
                             <tr>
+                                <th>Image</th>
                                 <th>Date</th>
                                 <th>Product</th>
-                                <th>Batch</th>
+                                <th>Batch ID</th>
                                 <th>Produced</th>
                                 <th>Sold</th>
-                                <th>Stock</th>
+                                <th>Stock Left</th>
                                 <th>Raw Materials Used</th>
                                 <th>Raw Cost</th>
-                                <th>Selling Price</th>
+                                <th>Unit Price</th>
                                 <th>Expected Profit</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
-
                         <tbody id="recordsTableBody"></tbody>
                     </table>
                 </div>
@@ -432,465 +539,409 @@
         </div>
     </div>
     
-    <script type="module">
-        import { firebaseService } from './firebase-config.js';
+<script type="module">
+import { firebaseService } from './firebase-config.js';
 
-        let productions = [];
-        let sales = [];
-        let filteredProductions = [];
-        let currentPage = 1;
-        let rowsPerPage = 15;
-        let unsubscribeProductions = null;
-        let unsubscribeSales = null;
+let productions = [];
+let sales = [];
+let filteredProductions = [];
+let currentPage = 1;
+let rowsPerPage = 15;
+let unsubscribeProductions = null;
+let unsubscribeSales = null;
+
+// ===== MOBILE SIDEBAR TOGGLE =====
+window.toggleSidebar = function() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('show');
+}
+
+window.closeSidebarOnMobile = function() {
+    if (window.innerWidth <= 992) {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+    }
+}
+
+function checkAuth() {
+    const session = localStorage.getItem("msme_production_session");
+    if(!session) {
+        window.location.href = "login.html";
+        return false;
+    }
+    const sessionData = JSON.parse(session);
+    if(!sessionData.loggedIn) {
+        window.location.href = "login.html";
+        return false;
+    }
+    document.getElementById("userName").innerHTML = `<i class="fas fa-user-circle"></i> ${sessionData.name || sessionData.username}`;
+    document.getElementById("userRole").innerText = sessionData.role.toUpperCase();
+    return true;
+}
+
+function logout() {
+    if(typeof firebaseService.logoutUser === 'function') {
+        firebaseService.logoutUser();
+    }
+    localStorage.removeItem("msme_production_session");
+    window.location.href = "login.html";
+}
+
+function loadData() {
+    if (unsubscribeProductions) unsubscribeProductions();
+    if (unsubscribeSales) unsubscribeSales();
+    
+    unsubscribeProductions = firebaseService.listenProductions((data) => {
+        productions = data;
+        applyFilters();
+    });
+    
+    unsubscribeSales = firebaseService.listenSales((data) => {
+        sales = data;
+        applyFilters();
+    });
+}
+
+function getSoldQty(productionId) {
+    return sales
+        .filter(s => String(s.productionId) === String(productionId))
+        .reduce((sum, s) => sum + getNumber(s.saleQty), 0);
+}
+
+function getStockQty(production) {
+    const produced = getNumber(production.outputQty);
+    const sold = getSoldQty(production.id);
+    return produced - sold;
+}
+
+function getRawMaterialsText(production) {
+    const materials = Array.isArray(production.rawMaterials) ? production.rawMaterials : [];
+    if(materials.length === 0) return "";
+    return materials.map(item => {
+        const name = item.name || "";
+        const qty = getNumber(item.qty);
+        const unit = item.unit || "";
+        const cost = getNumber(item.cost);
+        const qtyText = qty > 0 ? `${formatNumber(qty)} ${unit}`.trim() : "";
+        const costText = `₱${cost.toFixed(2)}`;
+        return `${name}${qtyText ? " - " + qtyText : ""} - ${costText}`;
+    }).join("; ");
+}
+
+function renderRawMaterials(production) {
+    const materials = Array.isArray(production.rawMaterials) ? production.rawMaterials : [];
+    if(materials.length === 0) {
+        return `<span class="raw-empty">No detailed raw materials</span>`;
+    }
+    return `
+        <div class="raw-materials-list">
+            <ul>
+                ${materials.map(item => {
+                    const name = escapeHtml(item.name || "");
+                    const qty = getNumber(item.qty);
+                    const unit = escapeHtml(item.unit || "");
+                    const cost = getNumber(item.cost);
+                    const qtyText = qty > 0 ? `${formatNumber(qty)} ${unit}`.trim() : "";
+                    return `
+                        <li>
+                            <strong>${name}</strong>
+                            ${qtyText ? `<br><span>${qtyText}</span>` : ""}
+                            <br><span>₱${cost.toFixed(2)}</span>
+                        </li>
+                    `;
+                }).join("")}
+            </ul>
+        </div>
+    `;
+}
+
+function applyFilters() {
+    let filtered = [...productions];
+    const search = document.getElementById("searchInput").value.toLowerCase().trim();
+    const dateFrom = document.getElementById("dateFrom").value;
+    const dateTo = document.getElementById("dateTo").value;
+    const sortBy = document.getElementById("sortBy").value;
+    
+    if(search) {
+        filtered = filtered.filter(p => {
+            const product = String(p.prodName || "").toLowerCase();
+            const batch = String(p.batchId || "").toLowerCase();
+            const rawMaterials = getRawMaterialsText(p).toLowerCase();
+            return product.includes(search) || batch.includes(search) || rawMaterials.includes(search);
+        });
+    }
+
+    if(dateFrom) filtered = filtered.filter(p => p.prodDate >= dateFrom);
+    if(dateTo) filtered = filtered.filter(p => p.prodDate <= dateTo);
+    
+    switch(sortBy) {
+        case "date_desc": filtered.sort((a,b) => new Date(b.prodDate) - new Date(a.prodDate)); break;
+        case "date_asc": filtered.sort((a,b) => new Date(a.prodDate) - new Date(b.prodDate)); break;
+        case "profit_desc": filtered.sort((a,b) => getNumber(b.profit) - getNumber(a.profit)); break;
+        case "profit_asc": filtered.sort((a,b) => getNumber(a.profit) - getNumber(b.profit)); break;
+        case "product_asc": filtered.sort((a,b) => String(a.prodName || "").localeCompare(String(b.prodName || ""))); break;
+        case "stock_desc": filtered.sort((a,b) => getStockQty(b) - getStockQty(a)); break;
+        case "stock_asc": filtered.sort((a,b) => getStockQty(a) - getStockQty(b)); break;
+        default: filtered.sort((a,b) => new Date(b.prodDate) - new Date(a.prodDate));
+    }
+    
+    filteredProductions = filtered;
+    document.getElementById("totalRecords").innerText = filteredProductions.length;
+    currentPage = 1;
+    renderTable();
+}
+
+function renderTable() {
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const pageData = filteredProductions.slice(start, end);
+    const tbody = document.getElementById("recordsTableBody");
+    
+    if(pageData.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="12" style="text-align:center; padding: 60px; color: var(--text-muted);">
+                    <i class="fas fa-folder-open" style="font-size: 2.5rem; margin-bottom: 12px; opacity: 0.3;"></i><br>
+                    No production records found matching your filters.
+                </td>
+            </tr>
+        `;
+        renderPagination();
+        return;
+    }
+    
+    tbody.innerHTML = pageData.map(p => {
+        const producedQty = getNumber(p.outputQty);
+        const soldQty = getSoldQty(p.id);
+        const stockQty = producedQty - soldQty;
+        const profit = getNumber(p.profit);
         
-        function checkAuth() {
-            const session = localStorage.getItem("msme_production_session");
-
-            if(!session) {
-                window.location.href = "login.html";
-                return false;
-            }
-
-            const sessionData = JSON.parse(session);
-
-            if(!sessionData.loggedIn) {
-                window.location.href = "login.html";
-                return false;
-            }
-
-            document.getElementById("userName").innerText = sessionData.name || sessionData.username;
-            document.getElementById("userRole").innerText = sessionData.role.toUpperCase();
-
-            return true;
-        }
-        
-        function logout() {
-            localStorage.removeItem("msme_production_session");
-            window.location.href = "login.html";
-        }
-        
-        function loadData() {
-            // Listen for real-time updates
-            if (unsubscribeProductions) unsubscribeProductions();
-            if (unsubscribeSales) unsubscribeSales();
-            
-            unsubscribeProductions = firebaseService.listenProductions((data) => {
-                productions = data;
-                applyFilters();
-            });
-            
-            unsubscribeSales = firebaseService.listenSales((data) => {
-                sales = data;
-                applyFilters();
-            });
+        let imageHtml = `<div class="img-placeholder"><i class="fas fa-image"></i></div>`;
+        if (p.imageUrl) {
+            imageHtml = `<img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.prodName)}" class="img-thumbnail" loading="lazy" onclick="window.open('${escapeHtml(p.imageUrl)}', '_blank')" style="cursor:pointer;" title="Click to view full image">`;
         }
 
-        function getSoldQty(productionId) {
-            return sales
-                .filter(s => String(s.productionId) === String(productionId))
-                .reduce((sum, s) => sum + getNumber(s.saleQty), 0);
-        }
-
-        function getStockQty(production) {
-            const produced = getNumber(production.outputQty);
-            const sold = getSoldQty(production.id);
-            return produced - sold;
-        }
-
-        function getRawMaterialsText(production) {
-            const materials = Array.isArray(production.rawMaterials) ? production.rawMaterials : [];
-
-            if(materials.length === 0) {
-                return "";
-            }
-
-            return materials.map(item => {
-                const name = item.name || "";
-                const qty = getNumber(item.qty);
-                const unit = item.unit || "";
-                const cost = getNumber(item.cost);
-
-                const qtyText = qty > 0 ? `${formatNumber(qty)} ${unit}`.trim() : "";
-                const costText = `₱${cost.toFixed(2)}`;
-
-                return `${name}${qtyText ? " - " + qtyText : ""} - ${costText}`;
-            }).join("; ");
-        }
-
-        function renderRawMaterials(production) {
-            const materials = Array.isArray(production.rawMaterials) ? production.rawMaterials : [];
-
-            if(materials.length === 0) {
-                return `<span class="raw-empty">No detailed raw materials</span>`;
-            }
-
-            return `
-                <div class="raw-materials-list">
-                    <ul>
-                        ${materials.map(item => {
-                            const name = escapeHtml(item.name || "");
-                            const qty = getNumber(item.qty);
-                            const unit = escapeHtml(item.unit || "");
-                            const cost = getNumber(item.cost);
-
-                            const qtyText = qty > 0 ? `${formatNumber(qty)} ${unit}`.trim() : "";
-
-                            return `
-                                <li>
-                                    <strong>${name}</strong>
-                                    ${qtyText ? `<br><span>${qtyText}</span>` : ""}
-                                    <br><span>₱${cost.toFixed(2)}</span>
-                                </li>
-                            `;
-                        }).join("")}
-                    </ul>
-                </div>
-            `;
-        }
-        
-        function applyFilters() {
-            let filtered = [...productions];
-
-            const search = document.getElementById("searchInput").value.toLowerCase().trim();
-            const dateFrom = document.getElementById("dateFrom").value;
-            const dateTo = document.getElementById("dateTo").value;
-            const sortBy = document.getElementById("sortBy").value;
-            
-            if(search) {
-                filtered = filtered.filter(p => {
-                    const product = String(p.prodName || "").toLowerCase();
-                    const batch = String(p.batchId || "").toLowerCase();
-                    const rawMaterials = getRawMaterialsText(p).toLowerCase();
-
-                    return product.includes(search) ||
-                           batch.includes(search) ||
-                           rawMaterials.includes(search);
-                });
-            }
-
-            if(dateFrom) {
-                filtered = filtered.filter(p => p.prodDate >= dateFrom);
-            }
-
-            if(dateTo) {
-                filtered = filtered.filter(p => p.prodDate <= dateTo);
-            }
-            
-            switch(sortBy) {
-                case "date_desc":
-                    filtered.sort((a,b) => new Date(b.prodDate) - new Date(a.prodDate));
-                    break;
-
-                case "date_asc":
-                    filtered.sort((a,b) => new Date(a.prodDate) - new Date(b.prodDate));
-                    break;
-
-                case "profit_desc":
-                    filtered.sort((a,b) => getNumber(b.profit) - getNumber(a.profit));
-                    break;
-
-                case "profit_asc":
-                    filtered.sort((a,b) => getNumber(a.profit) - getNumber(b.profit));
-                    break;
-
-                case "product_asc":
-                    filtered.sort((a,b) => String(a.prodName || "").localeCompare(String(b.prodName || "")));
-                    break;
-
-                case "stock_desc":
-                    filtered.sort((a,b) => getStockQty(b) - getStockQty(a));
-                    break;
-
-                case "stock_asc":
-                    filtered.sort((a,b) => getStockQty(a) - getStockQty(b));
-                    break;
-
-                default:
-                    filtered.sort((a,b) => new Date(b.prodDate) - new Date(a.prodDate));
-            }
-            
-            filteredProductions = filtered;
-            document.getElementById("totalRecords").innerText = filteredProductions.length;
-            currentPage = 1;
-
-            renderTable();
-        }
-        
-        function renderTable() {
-            const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            const pageData = filteredProductions.slice(start, end);
-            const tbody = document.getElementById("recordsTableBody");
-            
-            if(pageData.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="11" style="text-align:center; padding: 40px;">
-                            No production records found
-                        </td>
-                    </tr>
-                `;
-
-                renderPagination();
-                return;
-            }
-            
-            tbody.innerHTML = pageData.map(p => {
-                const producedQty = getNumber(p.outputQty);
-                const soldQty = getSoldQty(p.id);
-                const stockQty = producedQty - soldQty;
-                const profit = getNumber(p.profit);
-
-                return `
-                    <tr>
-                        <td>${escapeHtml(p.prodDate || "")}</td>
-
-                        <td>
-                            <strong>${escapeHtml(p.prodName || "")}</strong>
-                        </td>
-
-                        <td>
-                            <span class="badge">${escapeHtml(p.batchId || "")}</span>
-                        </td>
-
-                        <td>${formatNumber(producedQty)}</td>
-
-                        <td>${formatNumber(soldQty)}</td>
-
-                        <td class="${stockQty <= 0 ? "stock-low" : "stock-good"}">
-                            ${formatNumber(stockQty)}
-                        </td>
-
-                        <td>${renderRawMaterials(p)}</td>
-
-                        <td>₱${getNumber(p.rawCost).toFixed(2)}</td>
-
-                        <td>₱${getNumber(p.sellPrice).toFixed(2)}</td>
-
-                        <td class="${profit >= 0 ? "profit-positive" : "profit-negative"}">
-                            ₱${profit.toFixed(2)}
-                        </td>
-
-                        <td>
-                            <button onclick="deleteRecord('${String(p.id)}')" class="btn-danger">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join("");
-
-            renderPagination();
-        }
-        
-        function renderPagination() {
-            const totalPages = Math.ceil(filteredProductions.length / rowsPerPage);
-            const paginationDiv = document.getElementById("pagination");
-
-            if(totalPages <= 1) {
-                paginationDiv.innerHTML = "";
-                return;
-            }
-
-            let html = `
-                <button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? "disabled" : ""}>
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-            `;
-
-            const maxButtons = 7;
-            let startPage = Math.max(1, currentPage - 3);
-            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
-
-            if(endPage - startPage < maxButtons - 1) {
-                startPage = Math.max(1, endPage - maxButtons + 1);
-            }
-
-            for(let i = startPage; i <= endPage; i++) {
-                html += `
-                    <button class="page-btn ${currentPage === i ? "active" : ""}" onclick="changePage(${i})">
-                        ${i}
+        return `
+            <tr>
+                <td>${imageHtml}</td>
+                <td><span style="white-space: nowrap;">${escapeHtml(p.prodDate || "")}</span></td>
+                <td><strong>${escapeHtml(p.prodName || "")}</strong></td>
+                <td><span class="badge badge-neutral">${escapeHtml(p.batchId || "")}</span></td>
+                <td>${formatNumber(producedQty)}</td>
+                <td>${formatNumber(soldQty)}</td>
+                <td>
+                    <span class="badge ${stockQty <= 0 ? "badge-danger" : "badge-success"}">
+                        ${formatNumber(stockQty)}
+                    </span>
+                </td>
+                <td>${renderRawMaterials(p)}</td>
+                <td>₱${getNumber(p.rawCost).toFixed(2)}</td>
+                <td>₱${getNumber(p.sellPrice).toFixed(2)}</td>
+                <td>
+                    <span class="badge ${profit >= 0 ? "badge-success" : "badge-danger"}">
+                        ₱${profit.toFixed(2)}
+                    </span>
+                </td>
+                <td>
+                    <button onclick="deleteRecord('${String(p.id)}')" class="btn-danger-icon" title="Delete Record">
+                        <i class="fas fa-trash"></i>
                     </button>
-                `;
+                </td>
+            </tr>
+        `;
+    }).join("");
+
+    renderPagination();
+}
+
+function renderPagination() {
+    const totalPages = Math.ceil(filteredProductions.length / rowsPerPage);
+    const paginationDiv = document.getElementById("pagination");
+
+    if(totalPages <= 1) {
+        paginationDiv.innerHTML = "";
+        return;
+    }
+
+    let html = `
+        <button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? "disabled" : ""}>
+            <i class="fas fa-chevron-left"></i>
+        </button>
+    `;
+
+    const maxButtons = 5;
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+
+    if(endPage - startPage < maxButtons - 1) {
+        startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+
+    for(let i = startPage; i <= endPage; i++) {
+        html += `
+            <button class="page-btn ${currentPage === i ? "active" : ""}" onclick="changePage(${i})">
+                ${i}
+            </button>
+        `;
+    }
+
+    html += `
+        <button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? "disabled" : ""}>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    `;
+
+    paginationDiv.innerHTML = html;
+}
+
+function changePage(page) {
+    const totalPages = Math.ceil(filteredProductions.length / rowsPerPage);
+    if(page < 1 || page > totalPages) return;
+    currentPage = page;
+    renderTable();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function deleteRecord(id) {
+    const relatedSales = sales.filter(s => String(s.productionId) === String(id));
+    let message = "Are you sure you want to delete this production record?";
+    
+    if(relatedSales.length > 0) {
+        message += `\n\n⚠️ WARNING: This will also delete ${relatedSales.length} related sale record(s).`;
+    }
+
+    if(confirm(message)) {
+        try {
+            const result = await firebaseService.deleteProduction(id);
+            if (result.success) {
+                // Success
+            } else {
+                alert('Error deleting production: ' + result.error);
             }
-
-            html += `
-                <button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? "disabled" : ""}>
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            `;
-
-            paginationDiv.innerHTML = html;
+        } catch (error) {
+            alert('System error: ' + error.message);
         }
-        
-        function changePage(page) {
-            const totalPages = Math.ceil(filteredProductions.length / rowsPerPage);
+    }
+}
 
-            if(page < 1 || page > totalPages) {
-                return;
-            }
+function exportCSV() {
+    if(filteredProductions.length === 0) {
+        alert("No data to export");
+        return;
+    }
 
-            currentPage = page;
-            renderTable();
-        }
-        
-        async function deleteRecord(id) {
-            const relatedSales = sales.filter(s => String(s.productionId) === String(id));
+    const headers = ["Date", "Product", "Batch", "Produced", "Sold", "Stock", "Raw Materials Used", "Raw Cost", "Selling Price", "Expected Profit", "Image URL"];
+    
+    const rows = filteredProductions.map(p => {
+        const producedQty = getNumber(p.outputQty);
+        const soldQty = getSoldQty(p.id);
+        const stockQty = producedQty - soldQty;
 
-            let message = "Are you sure you want to delete this production record?";
+        return [
+            p.prodDate,
+            p.prodName,
+            p.batchId,
+            producedQty,
+            soldQty,
+            stockQty,
+            getRawMaterialsText(p),
+            getNumber(p.rawCost).toFixed(2),
+            getNumber(p.sellPrice).toFixed(2),
+            getNumber(p.profit).toFixed(2),
+            p.imageUrl || ""
+        ];
+    });
 
-            if(relatedSales.length > 0) {
-                message += `\n\nThis will also delete ${relatedSales.length} related sale record(s).`;
-            }
+    const csvContent = [headers, ...rows].map(row => row.map(escapeCsv).join(",")).join("\n");
+    const blob = new Blob([csvContent], {type: "text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `msme_productions_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
 
-            if(confirm(message)) {
-                const result = await firebaseService.deleteProduction(id);
-                if (result.success) {
-                    alert('Production record deleted successfully.');
-                } else {
-                    alert('Error deleting production: ' + result.error);
-                }
-                // Data will auto-update via Firebase listener
-            }
-        }
-        
-        function exportCSV() {
-            if(filteredProductions.length === 0) {
-                alert("No data to export");
-                return;
-            }
+function exportJSON() {
+    if(filteredProductions.length === 0) {
+        alert("No data to export");
+        return;
+    }
 
-            const headers = [
-                "Date",
-                "Product",
-                "Batch",
-                "Produced",
-                "Sold",
-                "Stock",
-                "Raw Materials Used",
-                "Raw Cost",
-                "Selling Price",
-                "Expected Profit"
-            ];
+    const exportData = filteredProductions.map(p => {
+        const producedQty = getNumber(p.outputQty);
+        const soldQty = getSoldQty(p.id);
+        const stockQty = producedQty - soldQty;
 
-            const rows = filteredProductions.map(p => {
-                const producedQty = getNumber(p.outputQty);
-                const soldQty = getSoldQty(p.id);
-                const stockQty = producedQty - soldQty;
+        return {
+            ...p,
+            producedQty,
+            soldQty,
+            stockQty,
+            rawMaterialsText: getRawMaterialsText(p)
+        };
+    });
 
-                return [
-                    p.prodDate,
-                    p.prodName,
-                    p.batchId,
-                    producedQty,
-                    soldQty,
-                    stockQty,
-                    getRawMaterialsText(p),
-                    getNumber(p.rawCost).toFixed(2),
-                    getNumber(p.sellPrice).toFixed(2),
-                    getNumber(p.profit).toFixed(2)
-                ];
-            });
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([dataStr], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `msme_productions_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
 
-            const csvContent = [headers, ...rows]
-                .map(row => row.map(escapeCsv).join(","))
-                .join("\n");
+function escapeHtml(str) {
+    if(!str) return "";
+    return String(str).replace(/[&<>"']/g, function(m) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m];
+    });
+}
 
-            const blob = new Blob([csvContent], {type: "text/csv"});
-            const url = URL.createObjectURL(blob);
+function escapeCsv(value) {
+    const str = String(value ?? "");
+    return /[",\n]/.test(str) ? '"' + str.replace(/"/g, '""') + '"' : str;
+}
 
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `msme_productions_${new Date().toISOString().slice(0,10)}.csv`;
-            a.click();
+function getNumber(value) {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : 0;
+}
 
-            URL.revokeObjectURL(url);
-        }
-        
-        function exportJSON() {
-            const exportData = filteredProductions.map(p => {
-                const producedQty = getNumber(p.outputQty);
-                const soldQty = getSoldQty(p.id);
-                const stockQty = producedQty - soldQty;
+function formatNumber(value) {
+    const num = getNumber(value);
+    return Number.isInteger(num) ? num.toString() : num.toFixed(2);
+}
 
-                return {
-                    ...p,
-                    producedQty,
-                    soldQty,
-                    stockQty,
-                    rawMaterialsText: getRawMaterialsText(p)
-                };
-            });
+document.getElementById("applyFilters").addEventListener("click", applyFilters);
+document.getElementById("resetFilters").addEventListener("click", () => {
+    document.getElementById("searchInput").value = "";
+    document.getElementById("dateFrom").value = "";
+    document.getElementById("dateTo").value = "";
+    document.getElementById("sortBy").value = "date_desc";
+    applyFilters();
+});
 
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const blob = new Blob([dataStr], {type: "application/json"});
-            const url = URL.createObjectURL(blob);
+// Initialize
+if(checkAuth()) {
+    loadData();
+}
 
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `msme_productions_${new Date().toISOString().slice(0,10)}.json`;
-            a.click();
+window.addEventListener('beforeunload', () => {
+    if (unsubscribeProductions) unsubscribeProductions();
+    if (unsubscribeSales) unsubscribeSales();
+});
 
-            URL.revokeObjectURL(url);
-        }
-        
-        function escapeHtml(str) {
-            if(!str) return "";
-
-            return String(str).replace(/[&<>"']/g, function(m) {
-                return {
-                    "&": "&amp;",
-                    "<": "&lt;",
-                    ">": "&gt;",
-                    '"': "&quot;",
-                    "'": "&#39;"
-                }[m];
-            });
-        }
-
-        function escapeCsv(value) {
-            const str = String(value ?? "");
-            return /[",\n]/.test(str) ? '"' + str.replace(/"/g, '""') + '"' : str;
-        }
-
-        function getNumber(value) {
-            const num = Number(value);
-            return Number.isFinite(num) ? num : 0;
-        }
-
-        function formatNumber(value) {
-            const num = getNumber(value);
-            return Number.isInteger(num) ? num.toString() : num.toFixed(2);
-        }
-        
-        document.getElementById("applyFilters").addEventListener("click", applyFilters);
-
-        document.getElementById("resetFilters").addEventListener("click", () => {
-            document.getElementById("searchInput").value = "";
-            document.getElementById("dateFrom").value = "";
-            document.getElementById("dateTo").value = "";
-            document.getElementById("sortBy").value = "date_desc";
-
-            applyFilters();
-        });
-        
-        // Initialize
-        if(checkAuth()) {
-            loadData();
-        }
-
-        // Clean up listeners on page unload
-        window.addEventListener('beforeunload', () => {
-            if (unsubscribeProductions) unsubscribeProductions();
-            if (unsubscribeSales) unsubscribeSales();
-        });
-
-        // Make functions globally accessible
-        window.logout = logout;
-        window.deleteRecord = deleteRecord;
-        window.exportCSV = exportCSV;
-        window.exportJSON = exportJSON;
-        window.changePage = changePage;
-    </script>
+window.logout = logout;
+window.deleteRecord = deleteRecord;
+window.exportCSV = exportCSV;
+window.exportJSON = exportJSON;
+window.changePage = changePage;
+</script>
 </body>
 </html>

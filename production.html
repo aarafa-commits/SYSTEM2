@@ -3,321 +3,500 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Record Production | MSME Production System Management</title>
+    <title>Record Production | MSME Production</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: #f0f4f8; min-height: 100vh; }
+        :root {
+            --primary: #15803d;
+            --primary-hover: #166534;
+            --primary-light: #dcfce7;
+            --secondary: #0f172a;
+            --accent: #f59e0b;
+            --bg-body: #f1f5f9;
+            --bg-surface: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        body { background: var(--bg-body); color: var(--text-dark); min-height: 100vh; overflow-x: hidden; }
         
-        /* Sidebar */
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* ===== SIDEBAR ===== */
         .sidebar {
             position: fixed;
             left: 0;
             top: 0;
             width: 280px;
             height: 100%;
-            background: linear-gradient(180deg, #1e4b2e 0%, #0f2e1e 100%);
+            background: linear-gradient(180deg, #064e3b 0%, #022c22 100%);
             color: white;
-            z-index: 100;
-            overflow-y: auto;
-        }
-        
-        .sidebar-header { padding: 28px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-header h2 { font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
-        .sidebar-header p { font-size: 0.7rem; opacity: 0.7; margin-top: 8px; }
-        
-        .nav-menu { padding: 24px 0; }
-        .nav-item { padding: 12px 24px; display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.8); text-decoration: none; transition: all 0.2s; }
-        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: white; border-left: 4px solid #f59e0b; }
-        .nav-item i { width: 24px; font-size: 1.2rem; }
-        
-        .user-info {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 20px 24px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.2);
+            transition: var(--transition);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 24px rgba(0,0,0,0.08);
         }
 
-        .user-info .user-name { font-weight: 600; margin-bottom: 4px; }
-        .user-info .user-role { font-size: 0.75rem; opacity: 0.7; }
+        .sidebar-header {
+            padding: 32px 24px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-        .logout-btn {
-            margin-top: 12px;
-            background: rgba(255,255,255,0.2);
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-header h2 i { 
+            color: var(--accent); 
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-header p {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .sidebar-close-btn {
+            display: none;
+            background: transparent;
             border: none;
             color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        .nav-menu { padding: 20px 0; flex-grow: 1; overflow-y: auto; }
+        
+        .nav-item {
+            padding: 12px 20px;
+            margin: 6px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.06);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
+        }
+
+        .nav-item i { width: 22px; font-size: 1.1rem; text-align: center; opacity: 0.8; }
+        .nav-item.active i { opacity: 1; }
+
+        .user-info {
+            padding: 24px;
+            background: rgba(0,0,0,0.3);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .user-name { font-weight: 700; margin-bottom: 4px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+        .user-name i { color: var(--primary-light); }
+        .user-role { font-size: 0.75rem; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; margin-left: 22px; }
+
+        .logout-btn {
+            margin-top: 16px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #e2e8f0;
+            padding: 10px 16px;
+            border-radius: 8px;
             cursor: pointer;
             width: 100%;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
+            font-weight: 600;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-        }
-        
-        .main-content { margin-left: 280px; padding: 24px; }
-        
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 28px;
-            flex-wrap: wrap;
-            gap: 16px;
+            transition: var(--transition);
         }
 
-        .page-title h1 { font-size: 1.8rem; color: #1f3b2c; }
-        .page-title p { color: #6c7a89; margin-top: 4px; }
+        .logout-btn:hover {
+            background: #ef4444; border-color: #ef4444; color: white; transform: translateY(-2px);
+        }
+
+        /* ===== MOBILE HEADER & HAMBURGER ===== */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 20px;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 900;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mobile-header .brand-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hamburger-btn {
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            color: var(--secondary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 950;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-left: 280px;
+            padding: clamp(20px, 4vw, 40px);
+            max-width: 1600px;
+            min-height: 100vh;
+            transition: var(--transition);
+        }
+
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; flex-wrap: wrap; gap: 20px;
+        }
+
+        .page-title h1 {
+            font-size: clamp(1.8rem, 3vw, 2.2rem); color: var(--secondary); font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px;
+        }
+        .page-title p { color: var(--text-muted); font-size: clamp(0.9rem, 1.2vw, 1.05rem); }
 
         .back-btn {
-            background: #e2e8f0;
-            padding: 10px 20px;
-            border-radius: 40px;
+            background: var(--bg-surface);
+            padding: 12px 20px;
+            border-radius: 12px;
             text-decoration: none;
-            color: #2d3748;
+            color: var(--secondary);
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
         }
         
-        .card {
-            background: white;
-            border-radius: 28px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-            margin-bottom: 28px;
-            overflow: hidden;
+        .back-btn:hover {
+            border-color: #cbd5e1; box-shadow: var(--shadow-md); transform: translateY(-2px);
         }
 
-        .card-header { padding: 24px 28px; border-bottom: 2px solid #f0f2f5; }
-        .card-header h2 { color: #1f3b2c; }
-        .card-body { padding: 28px; }
+        /* ===== CARDS & FORMS ===== */
+        .card {
+            background: var(--bg-surface);
+            border-radius: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 40px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .card:hover { box-shadow: var(--shadow-md); }
+
+        .card-header { padding: 24px clamp(20px, 3vw, 32px); border-bottom: 1px solid var(--border-color); background: rgba(248, 250, 252, 0.5); }
+        .card-header h2 { color: var(--secondary); font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+        .card-header h2 i { color: var(--primary); background: var(--primary-light); padding: 8px; border-radius: 8px; }
+        
+        .card-body { padding: clamp(20px, 3vw, 32px); }
         
         .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px;
         }
 
         .form-group { margin-bottom: 24px; }
 
         label {
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: #2c3e50;
-            margin-bottom: 8px;
-            display: block;
+            font-weight: 600; font-size: 0.9rem; color: var(--text-dark); margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
         }
+        
+        label i { color: var(--text-muted); font-size: 0.9rem; }
 
         input, select {
             width: 100%;
             padding: 14px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
             font-size: 0.95rem;
-            transition: 0.2s;
+            transition: var(--transition);
+            background: var(--bg-body);
+            color: var(--text-dark);
         }
 
         input:focus, select:focus {
-            border-color: #2c7a4a;
+            border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(44,122,74,0.1);
+            background: var(--bg-surface);
+            box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.1);
         }
 
         input[readonly] {
-            background: #f8fafc;
-            color: #1f3b2c;
-            font-weight: 700;
+            background: #f1f5f9; color: var(--text-muted); font-weight: 600; cursor: not-allowed; border-color: transparent;
         }
         
         button {
-            background: #2c7a4a;
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 40px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 1rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: 0.2s;
+            background: var(--primary); color: white; border: none; padding: 14px 28px; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 1rem; display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: var(--transition); box-shadow: var(--shadow-sm);
         }
 
-        button:hover {
-            background: #1f5e3a;
-            transform: translateY(-2px);
-        }
+        button:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: var(--shadow-md); }
 
-        .btn-outline {
-            background: white;
-            color: #2d3748;
-            border: 2px solid #cbd5e0;
-        }
+        .btn-outline { background: var(--bg-surface); color: var(--secondary); border: 1px solid var(--border-color); box-shadow: none; }
+        .btn-outline:hover { background: var(--bg-body); border-color: #cbd5e1; color: var(--text-dark); }
 
-        .btn-outline:hover {
-            background: #f8fafc;
-            border-color: #2c7a4a;
-            color: #1f3b2c;
-        }
-
-        .btn-danger {
-            background: #dc2626;
-            padding: 10px 14px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-        }
-
-        .btn-danger:hover {
-            background: #b91c1c;
-        }
+        .btn-danger { background: #ef4444; padding: 10px 14px; border-radius: 10px; font-size: 0.9rem; box-shadow: none; }
+        .btn-danger:hover { background: #dc2626; }
         
-        .profit-preview {
-            background: linear-gradient(135deg, #e8f5e9, #c8e6d9);
+        /* ===== IMAGE UPLOAD ===== */
+        .image-upload-box {
+            position: relative;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-body);
             padding: 24px;
-            border-radius: 20px;
-            margin-top: 24px;
             text-align: center;
-        }
-
-        .profit-preview h3 { color: #1f3b2c; margin-bottom: 12px; }
-        .profit-amount { font-size: 2.5rem; font-weight: 800; color: #2c7a4a; }
-        
-        .alert-success {
-            background: #c6f6d5;
-            color: #22543d;
-            padding: 16px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            display: none;
+            cursor: pointer;
+            transition: var(--transition);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 12px;
+            justify-content: center;
+            min-height: 160px;
         }
 
+        .image-upload-box:hover { border-color: var(--primary); background: var(--primary-light); }
+        .file-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10; }
+        .preview-area { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--text-muted); pointer-events: none; }
+        .preview-area i { font-size: 2rem; color: var(--primary); }
+        .preview-area span { font-weight: 500; font-size: 0.9rem; }
+        .preview-area small { font-size: 0.75rem; opacity: 0.8; }
+        .preview-img { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; border-radius: 10px; display: none; z-index: 5; }
+
+        /* ===== PROFIT PREVIEW ===== */
+        .profit-preview {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            padding: 32px;
+            border-radius: 16px;
+            margin-top: 32px;
+            text-align: center;
+            border: 1px solid #bbf7d0;
+        }
+
+        .profit-preview h3 { color: #166534; margin-bottom: 12px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .profit-amount { font-size: clamp(2rem, 3.5vw, 2.75rem); font-weight: 900; color: #15803d; letter-spacing: -1px; }
+        .profit-preview p { color: #166534; font-size: 0.9rem; opacity: 0.8; margin-top: 8px; font-weight: 500; }
+        
+        /* ===== ALERTS ===== */
+        .alert-success {
+            background: #f0fdf4; color: #166534; padding: 16px 20px; border-radius: 12px; margin-bottom: 24px; display: none; align-items: center; gap: 12px; border: 1px solid #bbf7d0; font-weight: 500;
+        }
+
+        /* ===== RAW MATERIALS BOX ===== */
         .raw-materials-box {
-            margin-top: 10px;
-            padding: 20px;
-            background: #f8fafc;
-            border-radius: 24px;
+            margin-top: 16px;
+            padding: clamp(20px, 3vw, 32px);
+            background: var(--bg-body);
+            border-radius: 20px;
             border: 2px dashed #cbd5e0;
         }
 
         .raw-materials-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            margin-bottom: 18px;
-            flex-wrap: wrap;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
         }
 
-        .raw-materials-header h3 {
-            color: #1f3b2c;
-            font-size: 1.1rem;
-        }
+        .raw-materials-header h3 { color: var(--secondary); font-size: 1.15rem; font-weight: 700; }
 
         .raw-row {
             display: grid;
-            grid-template-columns: 1.3fr 0.8fr 0.8fr 0.9fr auto;
-            gap: 12px;
+            grid-template-columns: 1.5fr 0.8fr 0.8fr 1fr auto;
+            gap: 16px;
             align-items: end;
-            margin-bottom: 14px;
-            padding: 14px;
-            background: white;
-            border-radius: 20px;
-            border: 1px solid #e2e8f0;
+            margin-bottom: 16px;
+            padding: 20px;
+            background: var(--bg-surface);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
         }
 
-        .raw-row .form-group {
-            margin-bottom: 0;
-        }
+        .raw-row .form-group { margin-bottom: 0; }
+        .raw-row label { font-size: 0.8rem; margin-bottom: 6px; }
 
         .raw-total-box {
-            margin-top: 18px;
-            background: white;
-            border-radius: 20px;
-            padding: 18px;
+            margin-top: 24px;
+            background: var(--bg-surface);
+            border-radius: 16px;
+            padding: 24px 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 16px;
             flex-wrap: wrap;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
         }
 
-        .raw-total-box strong {
-            color: #1f3b2c;
-            font-size: 1.1rem;
+        .raw-total-box strong { color: var(--secondary); font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+        .raw-total-box strong i { color: var(--primary); }
+
+        .raw-total-amount { font-size: 1.75rem; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
+
+        /* ===== HOW IT WORKS CARDS ===== */
+        .info-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px;
         }
 
-        .raw-total-amount {
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: #2c7a4a;
+        .info-card {
+            text-align: center; padding: 32px 24px; background: var(--bg-body); border-radius: 16px; border: 1px solid var(--border-color);
         }
         
-        @media (max-width: 900px) {
-            .raw-row {
-                grid-template-columns: 1fr;
+        .info-card i { font-size: 2rem; color: var(--primary); margin-bottom: 16px; }
+        .info-card h4 { color: var(--secondary); font-size: 1.1rem; margin-bottom: 8px; font-weight: 700; }
+        .info-card p { color: var(--text-muted); font-size: 0.95rem; }
+        
+        /* ===== RESPONSIVE MEDIA QUERIES ===== */
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-close-btn { display: block; }
+            .mobile-header { display: flex; }
+            .main-content {
+                margin-left: 0;
+                padding-top: calc(70px + clamp(20px, 4vw, 40px));
             }
+        }
 
-            .btn-danger {
-                justify-content: center;
-            }
+        @media (max-width: 900px) {
+            .raw-row { grid-template-columns: 1fr; gap: 12px; }
+            .btn-danger { justify-content: center; width: 100%; padding: 14px; margin-top: 8px; }
         }
 
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
-            .main-content { margin-left: 0; }
+            .top-bar { flex-direction: column; align-items: flex-start; }
+            .top-bar .back-btn { width: 100%; justify-content: center; }
+            .form-grid { grid-template-columns: 1fr; }
+            .card-body, .card-header { padding: 20px; }
+            .raw-materials-box { padding: 20px; }
         }
     </style>
 </head>
 
 <body>
-    <div class="sidebar">
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="brand-title">
+            <i class="fas fa-industry" style="color: var(--primary);"></i> MSME Production
+        </div>
+        <button class="hamburger-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h2><i class="fas fa-chart-line"></i> MSME Production</h2>
-            <p>Management System</p>
+            <h2><i class="fas fa-industry"></i> MSME Production</h2>
+            <button class="sidebar-close-btn" onclick="toggleSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div style="padding: 0 24px 16px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <p>Management Workspace</p>
         </div>
 
         <div class="nav-menu">
-            <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
+            <a href="dashboard.html" class="nav-item" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-th-large"></i> Dashboard
             </a>
-
-            <a href="production.html" class="nav-item active">
-                <i class="fas fa-plus-circle"></i> Record Production
+            <a href="production.html" class="nav-item active" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-hammer"></i> Record Production
             </a>
-
-            <a href="sales.html" class="nav-item">
-                <i class="fas fa-cash-register"></i> Record Sale
+            <a href="sales.html" class="nav-item" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-file-invoice-dollar"></i> Record Sale
             </a>
-
-            <a href="analytics.html" class="nav-item">
-                <i class="fas fa-chart-bar"></i> Analytics
+            <a href="analytics.html" class="nav-item" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-chart-pie"></i> Analytics
             </a>
-
-            <a href="records.html" class="nav-item">
-                <i class="fas fa-database"></i> Production Records
+            <a href="records.html" class="nav-item" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-archive"></i> Production Records
             </a>
-
-            <a href="reports.html" class="nav-item">
-                <i class="fas fa-file-alt"></i> Reports
+            <a href="reports.html" class="nav-item" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-chart-line"></i> Reports
             </a>
         </div>
 
         <div class="user-info">
-            <div class="user-name" id="userName">Loading...</div>
+            <div class="user-name" id="userName"><i class="fas fa-user-circle"></i> Loading...</div>
             <div class="user-role" id="userRole">Loading...</div>
             <button class="logout-btn" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> Logout
+                <i class="fas fa-sign-out-alt"></i> Sign Out
             </button>
         </div>
     </div>
@@ -325,8 +504,8 @@
     <div class="main-content">
         <div class="top-bar">
             <div class="page-title">
-                <h1><i class="fas fa-plus-circle"></i> Record Production</h1>
-                <p>MSME Production System Management - Enter production details, raw materials, and calculate profit automatically</p>
+                <h1>Record Production</h1>
+                <p>Enter production batches, specify raw materials, upload images, and calculate margins.</p>
             </div>
 
             <a href="dashboard.html" class="back-btn">
@@ -336,7 +515,7 @@
         
         <div class="card">
             <div class="card-header">
-                <h2><i class="fas fa-clipboard-list"></i> Production Entry Form</h2>
+                <h2><i class="fas fa-clipboard-check"></i> Production Entry Form</h2>
             </div>
 
             <div class="card-body">
@@ -348,64 +527,77 @@
                     <div class="form-grid">
                         <div>
                             <div class="form-group">
-                                <label><i class="fas fa-utensils"></i> Product Name *</label>
-                                <input type="text" id="prodName" placeholder="e.g., Pandesal, Sourdough Bread" required>
+                                <label><i class="fas fa-box"></i> Product Name *</label>
+                                <input type="text" id="prodName" placeholder="e.g., Sourdough Bread, Rattan Chair" required>
                             </div>
 
                             <div class="form-group">
-                                <label><i class="fas fa-weight-hanging"></i> Output Quantity (units) *</label>
+                                <label><i class="fas fa-layer-group"></i> Output Quantity (Units) *</label>
                                 <input type="number" id="outputQty" step="1" min="1" value="0" required>
                             </div>
 
                             <div class="form-group">
-                                <label><i class="fas fa-coins"></i> Total Raw Material Cost (PHP) *</label>
+                                <label><i class="fas fa-money-bill-wave"></i> Total Raw Material Cost (₱) *</label>
                                 <input type="number" id="rawCost" step="0.01" value="0" readonly required>
                             </div>
                         </div>
 
                         <div>
                             <div class="form-group">
-                                <label><i class="fas fa-tag"></i> Selling Price per Unit (PHP) *</label>
+                                <label><i class="fas fa-tag"></i> Selling Price per Unit (₱) *</label>
                                 <input type="number" id="sellPrice" step="0.01" min="0" value="0" required>
                             </div>
 
                             <div class="form-group">
-                                <label><i class="fas fa-calendar-alt"></i> Production Date *</label>
+                                <label><i class="fas fa-calendar-day"></i> Production Date *</label>
                                 <input type="date" id="prodDate" required>
                             </div>
 
                             <div class="form-group">
                                 <label><i class="fas fa-barcode"></i> Batch Number (Optional)</label>
-                                <input type="text" id="batchId" placeholder="AUTO or custom batch ID">
+                                <input type="text" id="batchId" placeholder="Leave blank to auto-generate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- IMAGE UPLOAD SECTION -->
+                    <div class="form-group" style="margin-top: 16px;">
+                        <label><i class="fas fa-image"></i> Product Image (Optional)</label>
+                        <div class="image-upload-box">
+                            <input type="file" id="prodImage" accept="image/*" class="file-input">
+                            <img id="imagePreviewImg" class="preview-img" alt="Product Preview">
+                            <div class="preview-area" id="imagePreviewText">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Click or drag image to upload</span>
+                                <small>Supported formats: JPG, PNG, WEBP</small>
                             </div>
                         </div>
                     </div>
 
                     <div class="raw-materials-box">
                         <div class="raw-materials-header">
-                            <h3><i class="fas fa-box-open"></i> Raw Materials Used</h3>
-
+                            <h3><i class="fas fa-boxes"></i> Raw Materials Log</h3>
                             <button type="button" class="btn-outline" onclick="addRawMaterialRow()">
-                                <i class="fas fa-plus"></i> Add Raw Material
+                                <i class="fas fa-plus"></i> Add Material Item
                             </button>
                         </div>
 
                         <div id="rawMaterialsContainer"></div>
 
                         <div class="raw-total-box">
-                            <strong><i class="fas fa-calculator"></i> Auto Total Raw Cost</strong>
+                            <strong><i class="fas fa-calculator"></i> Calculated Raw Cost</strong>
                             <div class="raw-total-amount" id="rawTotalDisplay">₱0.00</div>
                         </div>
                     </div>
                     
                     <div class="profit-preview" id="profitPreview">
-                        <h3><i class="fas fa-chart-line"></i> Profit Preview</h3>
+                        <h3><i class="fas fa-chart-line"></i> Projected Batch Profit</h3>
                         <div class="profit-amount" id="previewProfit">₱0.00</div>
                         <p>Formula: (Selling Price × Quantity) - Total Raw Material Cost</p>
                     </div>
                     
-                    <button type="submit" style="width:100%; margin-top: 20px;">
-                        <i class="fas fa-save"></i> Record Production & Calculate Profit
+                    <button type="submit" style="width:100%; margin-top: 32px; padding: 18px;">
+                        <i class="fas fa-save"></i> Save Record & Calculate Profit
                     </button>
                 </form>
             </div>
@@ -417,34 +609,51 @@
             </div>
 
             <div class="card-body">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                    <div style="text-align: center; padding: 20px; background: #f8fafc; border-radius: 20px;">
-                        <i class="fas fa-chart-line" style="font-size: 2rem; color: #2c7a4a;"></i>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <i class="fas fa-coins" style="color: #0284c7;"></i>
                         <h4>Total Revenue</h4>
                         <p>Selling Price × Quantity</p>
                     </div>
 
-                    <div style="text-align: center; padding: 20px; background: #f8fafc; border-radius: 20px;">
-                        <i class="fas fa-minus-circle" style="font-size: 2rem; color: #f59e0b;"></i>
+                    <div class="info-card">
+                        <i class="fas fa-minus-circle" style="color: #ea580c;"></i>
                         <h4>Minus</h4>
                         <p>Total Raw Material Cost</p>
                     </div>
 
-                    <div style="text-align: center; padding: 20px; background: #f8fafc; border-radius: 20px;">
-                        <i class="fas fa-equals" style="font-size: 2rem; color: #2c7a4a;"></i>
+                    <div class="info-card">
+                        <i class="fas fa-equals" style="color: var(--primary);"></i>
                         <h4>Equals Profit</h4>
-                        <p>Net Profit per Batch</p>
+                        <p>Net Profit for this Batch</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <script type="module">
+<script type="module">
 import { firebaseService } from './firebase-config.js';
 
 let productions = [];
 let sales = [];
+
+// ===== MOBILE SIDEBAR TOGGLE =====
+window.toggleSidebar = function() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('show');
+}
+
+window.closeSidebarOnMobile = function() {
+    if (window.innerWidth <= 992) {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+    }
+}
 
 function checkAuth() {
     const session = localStorage.getItem("msme_production_session");
@@ -457,13 +666,15 @@ function checkAuth() {
         window.location.href = "login.html";
         return false;
     }
-    document.getElementById("userName").innerText = sessionData.name || sessionData.username;
+    document.getElementById("userName").innerHTML = `<i class="fas fa-user-circle"></i> ${sessionData.name || sessionData.username}`;
     document.getElementById("userRole").innerText = sessionData.role.toUpperCase();
     return true;
 }
 
 function logout() {
-    firebaseService.logoutUser();
+    if(typeof firebaseService.logoutUser === 'function') {
+        firebaseService.logoutUser();
+    }
     localStorage.removeItem("msme_production_session");
     window.location.href = "login.html";
 }
@@ -482,28 +693,51 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
+// ===== IMAGE UPLOAD PREVIEW LOGIC =====
+document.getElementById("prodImage").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById("imagePreviewImg").src = event.target.result;
+            document.getElementById("imagePreviewImg").style.display = "block";
+            document.getElementById("imagePreviewText").style.opacity = "0"; 
+        }
+        reader.readAsDataURL(file);
+    } else {
+        resetImagePreview();
+    }
+});
+
+function resetImagePreview() {
+    document.getElementById("prodImage").value = "";
+    document.getElementById("imagePreviewImg").src = "";
+    document.getElementById("imagePreviewImg").style.display = "none";
+    document.getElementById("imagePreviewText").style.opacity = "1";
+}
+
 function addRawMaterialRow(material = {}) {
     const container = document.getElementById("rawMaterialsContainer");
     const row = document.createElement("div");
     row.className = "raw-row";
     row.innerHTML = `
         <div class="form-group">
-            <label>Raw Material Name *</label>
-            <input type="text" class="raw-name" placeholder="e.g., Flour, Sugar, Yeast" value="${escapeHtml(material.name || '')}" required>
+            <label>Item Name *</label>
+            <input type="text" class="raw-name" placeholder="e.g. Flour, Fabric" value="${escapeHtml(material.name || '')}" required>
         </div>
         <div class="form-group">
-            <label>Quantity</label>
+            <label>Qty Used</label>
             <input type="number" class="raw-qty" step="0.01" min="0" placeholder="0" value="${getNumber(material.qty || 0)}">
         </div>
         <div class="form-group">
             <label>Unit</label>
-            <input type="text" class="raw-unit" placeholder="kg, pcs, pack" value="${escapeHtml(material.unit || '')}">
+            <input type="text" class="raw-unit" placeholder="kg, m, pcs" value="${escapeHtml(material.unit || '')}">
         </div>
         <div class="form-group">
-            <label>Cost (PHP) *</label>
+            <label>Cost (₱) *</label>
             <input type="number" class="raw-cost-item" step="0.01" min="0" placeholder="0.00" value="${getNumber(material.cost || 0)}" required>
         </div>
-        <button type="button" class="btn-danger" onclick="removeRawMaterialRow(this)">
+        <button type="button" class="btn-danger" onclick="removeRawMaterialRow(this)" title="Remove Item">
             <i class="fas fa-trash"></i>
         </button>
     `;
@@ -517,7 +751,7 @@ function addRawMaterialRow(material = {}) {
 window.removeRawMaterialRow = function(button) {
     const container = document.getElementById("rawMaterialsContainer");
     if (container.children.length <= 1) {
-        alert("At least one raw material is required.");
+        alert("At least one raw material is required for a production batch.");
         return;
     }
     button.closest(".raw-row").remove();
@@ -552,7 +786,7 @@ function updateProfitPreview() {
     const profit = (qty * price) - raw;
     const previewDiv = document.getElementById("previewProfit");
     previewDiv.innerHTML = `₱${profit.toFixed(2)}`;
-    previewDiv.style.color = profit >= 0 ? "#2c7a4a" : "#dc2626";
+    previewDiv.style.color = profit >= 0 ? "#15803d" : "#dc2626";
 }
 
 function resetRawMaterials() {
@@ -565,7 +799,7 @@ function showAlert(message) {
     const alertBox = document.getElementById("successAlert");
     alertBox.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
     alertBox.style.display = "flex";
-    setTimeout(() => { alertBox.style.display = "none"; }, 3000);
+    setTimeout(() => { alertBox.style.display = "none"; }, 4000);
 }
 
 document.getElementById("outputQty").addEventListener("input", updateProfitPreview);
@@ -580,8 +814,9 @@ document.getElementById("productionForm").addEventListener("submit", async (e) =
     const rawCost = getNumber(document.getElementById("rawCost").value);
     const sellPrice = getNumber(document.getElementById("sellPrice").value);
     const prodDate = document.getElementById("prodDate").value;
-    const batchId = document.getElementById("batchId").value.trim() || `BATCH-${new Date().toISOString().slice(0,10)}-${Math.floor(Math.random() * 1000)}`;
+    const batchId = document.getElementById("batchId").value.trim() || `BATCH-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.floor(Math.random() * 1000)}`;
     const rawMaterials = getRawMaterials();
+    const imageFile = document.getElementById("prodImage").files[0];
     
     if (!prodName || !prodDate) {
         alert("Please fill all required fields.");
@@ -589,7 +824,7 @@ document.getElementById("productionForm").addEventListener("submit", async (e) =
     }
     
     if (outputQty <= 0 || rawCost < 0 || sellPrice < 0) {
-        alert("Please enter valid production values.");
+        alert("Please enter valid production numerical values.");
         return;
     }
     
@@ -600,7 +835,7 @@ document.getElementById("productionForm").addEventListener("submit", async (e) =
     
     const invalidMaterial = rawMaterials.find(item => !item.name || item.cost < 0);
     if (invalidMaterial) {
-        alert("Please complete all raw material names and valid costs.");
+        alert("Please ensure all raw material names are filled and costs are valid.");
         return;
     }
     
@@ -616,19 +851,34 @@ document.getElementById("productionForm").addEventListener("submit", async (e) =
         sellPrice,
         prodDate,
         batchId,
-        profit
+        profit,
+        imageFile: imageFile || null
     };
     
-    const result = await firebaseService.addProduction(productionData);
-    
-    if (result.success) {
-        document.getElementById("productionForm").reset();
-        document.getElementById("prodDate").valueAsDate = new Date();
-        resetRawMaterials();
-        updateProfitPreview();
-        showAlert("Production record added successfully! Raw materials and profit calculated.");
-    } else {
-        alert("Error saving production: " + result.error);
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    submitBtn.disabled = true;
+
+    try {
+        const result = await firebaseService.addProduction(productionData);
+        
+        if (result.success) {
+            document.getElementById("productionForm").reset();
+            document.getElementById("prodDate").valueAsDate = new Date();
+            resetRawMaterials();
+            resetImagePreview();
+            updateProfitPreview();
+            showAlert("Production record added successfully! Raw materials and profit calculated.");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            alert("Error saving production: " + result.error);
+        }
+    } catch (error) {
+        alert("System error: " + error.message);
+    } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     }
 });
 

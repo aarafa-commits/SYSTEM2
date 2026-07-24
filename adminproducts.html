@@ -8,315 +8,457 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: #f0f4f8; min-height: 100vh; }
+        :root {
+            --primary: #15803d;
+            --primary-hover: #166534;
+            --primary-light: #dcfce7;
+            --secondary: #0f172a;
+            --accent: #f59e0b;
+            --bg-body: #f1f5f9;
+            --bg-surface: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        body { background: var(--bg-body); color: var(--text-dark); min-height: 100vh; overflow-x: hidden; }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* ===== SIDEBAR ===== */
         .sidebar {
             position: fixed;
             left: 0;
             top: 0;
             width: 280px;
             height: 100%;
-            background: linear-gradient(180deg, #1e4b2e 0%, #0f2e1e 100%);
+            background: linear-gradient(180deg, #064e3b 0%, #022c22 100%);
             color: white;
-            z-index: 100;
-            overflow-y: auto;
+            transition: var(--transition);
+            z-index: 1000;
             display: flex;
             flex-direction: column;
+            box-shadow: 4px 0 24px rgba(0,0,0,0.08);
         }
 
-        .sidebar-header { padding: 28px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-header h2 { font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
-        .sidebar-header p { font-size: 0.7rem; opacity: 0.7; margin-top: 8px; }
-        .nav-menu { padding: 24px 0; flex: 1; }
+        .sidebar-header {
+            padding: 32px 24px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-        .nav-item {
-            padding: 12px 24px;
+        .sidebar-header h2 {
+            font-size: 1.25rem;
             display: flex;
             align-items: center;
             gap: 12px;
-            color: rgba(255,255,255,0.8);
-            text-decoration: none;
-            transition: all 0.2s;
+            font-weight: 800;
+            letter-spacing: -0.5px;
         }
 
-        .nav-item:hover, .nav-item.active {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border-left: 4px solid #f59e0b;
+        .sidebar-header h2 i { 
+            color: var(--accent); 
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 1.1rem;
         }
 
-        .nav-item i { width: 24px; font-size: 1.2rem; }
-
-        .user-info {
-            margin-top: auto;
-            padding: 20px 24px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.2);
+        .sidebar-header p {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
         }
 
-        .user-info .user-name { font-weight: 600; margin-bottom: 4px; }
-        .user-info .user-role { font-size: 0.75rem; opacity: 0.7; }
-
-        .logout-btn {
-            margin-top: 12px;
-            background: rgba(255,255,255,0.2);
+        .sidebar-close-btn {
+            display: none;
+            background: transparent;
             border: none;
             color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        .nav-menu { padding: 20px 0; flex-grow: 1; overflow-y: auto; }
+        
+        .nav-item {
+            padding: 12px 20px;
+            margin: 6px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.06);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
+        }
+
+        .nav-item i { width: 22px; font-size: 1.1rem; text-align: center; opacity: 0.8; }
+        .nav-item.active i { opacity: 1; }
+
+        .user-info {
+            padding: 24px;
+            background: rgba(0,0,0,0.3);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .user-name { font-weight: 700; margin-bottom: 4px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+        .user-name i { color: var(--primary-light); }
+        .user-role { font-size: 0.75rem; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; margin-left: 22px; }
+
+        .logout-btn {
+            margin-top: 16px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #e2e8f0;
+            padding: 10px 16px;
+            border-radius: 8px;
             cursor: pointer;
             width: 100%;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
+            font-weight: 600;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            transition: var(--transition);
         }
 
-        .main-content { margin-left: 280px; padding: 24px; }
+        .logout-btn:hover { background: #ef4444; border-color: #ef4444; color: white; transform: translateY(-2px); }
 
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
+        /* ===== MOBILE HEADER & HAMBURGER ===== */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 20px;
             align-items: center;
-            margin-bottom: 28px;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .page-title h1 { font-size: 1.8rem; color: #1f3b2c; }
-        .page-title p { color: #6c7a89; margin-top: 4px; }
-
-        .quick-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-
-        .card {
-            background: white;
-            border-radius: 28px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-            margin-bottom: 28px;
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 20px 28px;
-            border-bottom: 2px solid #f0f2f5;
-            display: flex;
             justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
+            z-index: 900;
+            box-shadow: var(--shadow-sm);
         }
 
-        .card-header h2 {
-            color: #1f3b2c;
-            font-size: 1.25rem;
+        .mobile-header .brand-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--secondary);
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .card-body { padding: 24px; }
-
-        .filter-bar {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            align-items: flex-end;
-            margin-bottom: 18px;
-        }
-
-        input, select {
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 20px;
-            font-size: 0.95rem;
-            width: 100%;
-        }
-
-        input:focus, select:focus {
-            border-color: #2c7a4a;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(44,122,74,0.1);
-        }
-
-        label { font-weight: 600; font-size: 0.85rem; color: #2c3e50; margin-bottom: 8px; display: block; }
-        .form-group { margin-bottom: 18px; }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-            gap: 16px;
-        }
-
-        button, .btn {
-            background: #2c7a4a;
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 40px;
-            font-weight: 700;
+        .hamburger-btn {
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            color: var(--secondary);
+            padding: 8px 12px;
+            border-radius: 8px;
             cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.2s;
+            font-size: 1.2rem;
         }
 
-        button:hover, .btn:hover { background: #1f5e3a; transform: translateY(-2px); }
-        .btn-outline { background: white; border: 2px solid #cbd5e0; color: #2d3748; }
-        .btn-outline:hover { background: #f8fafc; border-color: #2c7a4a; color: #1f3b2c; }
-        .btn-danger { background: #dc2626; }
-        .btn-danger:hover { background: #b91c1c; }
-        .btn-warning { background: #f59e0b; }
-        .btn-warning:hover { background: #d97706; }
-        .btn-small { padding: 7px 12px; font-size: 0.8rem; }
-
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 14px 12px; text-align: left; border-bottom: 1px solid #edf2f7; vertical-align: top; }
-        th { background: #f8fafc; font-weight: 700; color: #1f3b2c; white-space: nowrap; }
-        .table-responsive { overflow-x: auto; }
-
-        .badge { background:#e2e8f0; padding:3px 8px; border-radius:20px; display:inline-block; font-size:0.8rem; }
-        .profit-positive, .stock-good { color: #2c7a4a; font-weight: 700; }
-        .profit-negative, .stock-low { color: #dc2626; font-weight: 700; }
-        .empty { text-align:center; padding:38px; color:#64748b; }
-
-        .modal-backdrop {
+        .sidebar-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.55);
-            z-index: 500;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 950;
             display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-left: 280px;
+            padding: clamp(20px, 4vw, 40px);
+            max-width: 1600px;
+            min-height: 100vh;
+            transition: var(--transition);
+        }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; flex-wrap: wrap; gap: 20px; }
+
+        .page-title h1 { font-size: clamp(1.8rem, 3vw, 2.2rem); color: var(--secondary); font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+        .page-title p { color: var(--text-muted); font-size: clamp(0.9rem, 1.2vw, 1.05rem); }
+
+        .quick-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        button, .btn {
+            background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition); box-shadow: var(--shadow-sm); text-decoration: none;
+        }
+
+        button:hover, .btn:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+        .btn-outline { background: var(--bg-surface); color: var(--secondary); border: 1px solid var(--border-color); box-shadow: none; }
+        .btn-outline:hover { background: var(--bg-body); border-color: #cbd5e1; color: var(--text-dark); }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--bg-surface); border-radius: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); margin-bottom: 32px; overflow: hidden; transition: var(--transition);
+        }
+        .card:hover { box-shadow: var(--shadow-md); }
+
+        .card-header { padding: 24px clamp(20px, 3vw, 32px); border-bottom: 1px solid var(--border-color); background: rgba(248, 250, 252, 0.5); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .card-header h2 { color: var(--secondary); font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+        .card-header h2 i { color: var(--primary); background: var(--primary-light); padding: 8px; border-radius: 8px; font-size: 1.1rem; }
+        .card-body { padding: clamp(20px, 3vw, 32px); }
+
+        /* ===== FILTER BAR ===== */
+        .filter-bar { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
+        .filter-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 200px; }
+        .filter-group label { font-weight: 600; font-size: 0.85rem; color: var(--text-dark); display: flex; align-items: center; gap: 6px; }
+        
+        input, select {
+            padding: 12px 16px; border: 2px solid var(--border-color); border-radius: 12px; font-size: 0.95rem; color: var(--text-dark); background: var(--bg-body); transition: var(--transition); width: 100%;
+        }
+        input:focus, select:focus {
+            border-color: var(--primary); outline: none; background: var(--bg-surface); box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.1);
+        }
+        input[readonly] { background: #f1f5f9; color: var(--text-muted); font-weight: 600; cursor: not-allowed; border-color: transparent; }
+
+        /* ===== TABLE ===== */
+        .table-responsive { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-color); width: 100%; }
+        table { width: 100%; border-collapse: collapse; min-width: 1050px; }
+        th, td { padding: 16px 20px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        th { background: #f8fafc; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
+        tbody tr { transition: var(--transition); }
+        tbody tr:hover { background-color: #f8fafc; }
+        td { color: var(--secondary); font-size: 0.95rem; font-weight: 500; }
+        td strong { font-weight: 700; }
+
+        .empty { text-align: center; padding: 60px 20px !important; color: var(--text-muted); font-style: italic; background: #f8fafc; }
+
+        .action-cell { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-edit-icon { background: #fef3c7; color: #d97706; border: none; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); padding: 0; box-shadow: none; }
+        .btn-edit-icon:hover { background: #f59e0b; color: white; transform: scale(1.05); }
+        .btn-danger-icon { background: #fee2e2; color: #dc2626; border: none; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); padding: 0; box-shadow: none; }
+        .btn-danger-icon:hover { background: #ef4444; color: white; transform: scale(1.05); }
+
+        .img-thumbnail { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-color); background: var(--bg-body); }
+        .img-placeholder { width: 40px; height: 40px; border-radius: 8px; background: var(--bg-body); color: var(--text-muted); display: flex; align-items: center; justify-content: center; border: 1px dashed #cbd5e0; font-size: 1rem; }
+
+        .badge { padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; letter-spacing: 0.3px; }
+        .badge-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .badge-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .badge-neutral { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+
+        .profit-positive { color: #15803d; font-weight: 700; }
+        .profit-negative { color: #dc2626; font-weight: 700; }
+        .stock-good { color: #15803d; font-weight: 700; }
+        .stock-low { color: #dc2626; font-weight: 700; }
+
+        /* ===== MODAL ===== */
+        .modal-backdrop {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 16px;
         }
 
         .modal {
-            background: white;
-            border-radius: 28px;
-            max-width: 850px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 25px 80px rgba(0,0,0,0.25);
+            background: var(--bg-surface); border-radius: 24px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: modalPop 0.3s ease-out forwards;
         }
+        @keyframes modalPop { from { opacity: 0; transform: scale(0.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-        .modal-header {
-            padding: 22px 28px;
-            border-bottom: 2px solid #f0f2f5;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            gap:16px;
+        .modal-header { padding: 20px clamp(20px, 3vw, 32px); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
+        .modal-header h3 { color: var(--secondary); display: flex; align-items: center; gap: 12px; font-size: 1.25rem; font-weight: 700; }
+        .modal-header h3 i { color: var(--accent); }
+        .modal-body { padding: clamp(20px, 3vw, 32px); }
+
+        .close-btn {
+            background: var(--bg-body); color: var(--text-muted); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); cursor: pointer; transition: var(--transition);
         }
+        .close-btn:hover { background: #e2e8f0; color: var(--secondary); }
 
-        .modal-header h3 { color:#1f3b2c; }
-        .modal-body { padding: 24px 28px; }
-        .close-btn { background:#e2e8f0; color:#334155; padding:8px 12px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+        .form-group { margin-bottom: 18px; }
+
+        /* ===== LOADING ===== */
+        .loading-row td { text-align: center; padding: 60px !important; color: var(--text-muted); }
+
+        /* ===== RESPONSIVE MEDIA QUERIES ===== */
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-close-btn { display: block; }
+            .mobile-header { display: flex; }
+            .main-content {
+                margin-left: 0;
+                padding-top: calc(70px + clamp(20px, 4vw, 40px));
+            }
+        }
 
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
-            .main-content { margin-left: 0; }
+            .top-bar { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .quick-actions { width: 100%; display: grid; grid-template-columns: 1fr; }
+            .quick-actions button, .quick-actions a { width: 100%; justify-content: center; }
+            .card-header { flex-direction: column; align-items: flex-start; }
+            .card-header > div { width: 100%; display: flex; gap: 8px; }
+            .card-header > div button { flex: 1; justify-content: center; }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .filter-group { min-width: 100%; }
         }
     </style>
 </head>
 
 <body>
-    <div class="sidebar">
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="brand-title">
+            <i class="fas fa-user-shield" style="color: var(--primary);"></i> MSME Admin
+        </div>
+        <button class="hamburger-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h2><i class="fas fa-user-shield"></i> Admin Panel</h2>
-            <p>MSME Production System Management</p>
+            <h2><i class="fas fa-user-shield"></i> MSME Admin</h2>
+            <button class="sidebar-close-btn" onclick="toggleSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div style="padding: 0 24px 16px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <p>System Management</p>
         </div>
 
         <div class="nav-menu">
-            <a href="admindashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</a>
-            <a href="adminproducts.html" class="nav-item active"><i class="fas fa-boxes"></i> Product Management</a>
-            <a href="adminanalytics.html" class="nav-item"><i class="fas fa-chart-bar"></i> Admin Analytics</a>
-            <a href="adminreports.html" class="nav-item"><i class="fas fa-file-alt"></i> Admin Reports</a>
-            <a href="adminusers.html" class="nav-item"><i class="fas fa-users-cog"></i> User Management</a>
+            <a href="admindashboard.html" class="nav-item" onclick="closeSidebarOnMobile()"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</a>
+            <a href="adminproducts.html" class="nav-item active" onclick="closeSidebarOnMobile()"><i class="fas fa-boxes"></i> Product Management</a>
+            <a href="adminanalytics.html" class="nav-item" onclick="closeSidebarOnMobile()"><i class="fas fa-chart-bar"></i> Admin Analytics</a>
+            <a href="adminreports.html" class="nav-item" onclick="closeSidebarOnMobile()"><i class="fas fa-file-alt"></i> Admin Reports</a>
+            <a href="adminusers.html" class="nav-item" onclick="closeSidebarOnMobile()"><i class="fas fa-users-cog"></i> User Management</a>
         </div>
 
         <div class="user-info">
-            <div class="user-name" id="userName">Loading...</div>
+            <div class="user-name" id="userName"><i class="fas fa-user-circle"></i> Loading...</div>
             <div class="user-role" id="userRole">Loading...</div>
-            <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
         </div>
     </div>
 
     <div class="main-content">
         <div class="top-bar">
             <div class="page-title">
-                <h1><i class="fas fa-boxes"></i> Product Management</h1>
-                <p>View, add, edit, delete production records, and manage product stock.</p>
+                <h1>Product Management</h1>
+                <p>View, filter, edit, and manage all production records across the system.</p>
             </div>
 
             <div class="quick-actions">
-                <button onclick="openProductionModal()"><i class="fas fa-plus"></i> Add Production</button>
-                <button class="btn-outline" onclick="exportProductionCSV()"><i class="fas fa-file-excel"></i> Export CSV</button>
+                <button onclick="openProductionModal()"><i class="fas fa-plus"></i> Manual Production</button>
+                <button class="btn-outline" onclick="exportProductionCSV()"><i class="fas fa-file-csv"></i> Export Data</button>
             </div>
         </div>
 
         <div class="card">
             <div class="card-header">
-                <h2><i class="fas fa-filter"></i> Search & Filter</h2>
+                <h2><i class="fas fa-filter"></i> Search & Filter Inventory</h2>
             </div>
             <div class="card-body">
                 <div class="filter-bar">
-                    <div style="min-width:260px; flex:1;">
-                        <label>Search Product / Batch</label>
-                        <input type="text" id="productSearch" placeholder="Search product or batch...">
+                    <div class="filter-group" style="flex: 2;">
+                        <label>Search Query</label>
+                        <input type="text" id="productSearch" placeholder="Search by product name or batch ID...">
                     </div>
-                    <div style="min-width:210px;">
+                    <div class="filter-group">
                         <label>Stock Filter</label>
                         <select id="stockFilter">
-                            <option value="all">All Stock</option>
+                            <option value="all">All Inventory</option>
                             <option value="out">Out of Stock</option>
                             <option value="low">Low Stock (1-5)</option>
-                            <option value="available">Available Stock</option>
+                            <option value="available">In Stock (>0)</option>
                         </select>
                     </div>
-                    <div style="min-width:180px;">
-                        <label>&nbsp;</label>
-                        <button onclick="renderProductionTable()"><i class="fas fa-search"></i> Apply</button>
-                    </div>
+                    <button onclick="renderProductionTable()" style="margin-bottom: 2px;"><i class="fas fa-search"></i> Apply Filter</button>
                 </div>
             </div>
         </div>
 
         <div class="card">
             <div class="card-header">
-                <h2><i class="fas fa-list"></i> Production Records</h2>
-                <div>Total: <span id="recordCount">0</span></div>
+                <h2><i class="fas fa-list-ul"></i> Production Registry</h2>
+                <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 600;">
+                    Total Records: <span id="recordCount" style="color: var(--primary);">0</span>
+                </div>
             </div>
-            <div class="card-body table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Product</th>
-                            <th>Batch</th>
-                            <th>Produced</th>
-                            <th>Sold</th>
-                            <th>Stock</th>
-                            <th>Raw Cost</th>
-                            <th>Sell Price</th>
-                            <th>Profit</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productionTableBody"></tbody>
-                </table>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Date</th>
+                                <th>Product</th>
+                                <th>Batch ID</th>
+                                <th>Produced</th>
+                                <th>Sold</th>
+                                <th>Stock</th>
+                                <th>Raw Cost</th>
+                                <th>Unit Price</th>
+                                <th>Total Profit</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productionTableBody">
+                            <tr class="loading-row">
+                                <td colspan="11">
+                                    <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-right: 12px;"></i>
+                                    Loading production records...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Edit Production Modal -->
     <div class="modal-backdrop" id="productionModal">
         <div class="modal">
             <div class="modal-header">
-                <h3 id="productionModalTitle"><i class="fas fa-edit"></i> Edit Production</h3>
+                <h3 id="productionModalTitle"><i class="fas fa-edit"></i> Edit Production Data</h3>
                 <button class="close-btn" onclick="closeProductionModal()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
@@ -341,26 +483,26 @@
                             <input type="number" id="editOutputQty" step="1" min="1" required>
                         </div>
                         <div class="form-group">
-                            <label>Sold Quantity</label>
+                            <label>Sold Quantity (Read-only)</label>
                             <input type="number" id="editSoldQty" step="1" min="0" readonly>
                         </div>
                         <div class="form-group">
-                            <label>Remaining Stock</label>
+                            <label>Remaining Stock (Auto-calc)</label>
                             <input type="number" id="editStockQty" step="1" min="0" readonly>
                         </div>
                         <div class="form-group">
-                            <label>Raw Material Cost *</label>
+                            <label>Total Raw Material Cost (₱) *</label>
                             <input type="number" id="editRawCost" step="0.01" min="0" required>
                         </div>
                         <div class="form-group">
-                            <label>Selling Price per Unit *</label>
+                            <label>Selling Price per Unit (₱) *</label>
                             <input type="number" id="editSellPrice" step="0.01" min="0" required>
                         </div>
                     </div>
 
-                    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:10px;">
-                        <button type="submit"><i class="fas fa-save"></i> Save Production</button>
-                        <button type="button" class="btn-outline" onclick="closeProductionModal()">Cancel</button>
+                    <div style="display:flex; gap:16px; margin-top:24px;">
+                        <button type="submit" style="flex:1;"><i class="fas fa-save"></i> Save Changes</button>
+                        <button type="button" class="btn-outline" style="flex:1;" onclick="closeProductionModal()">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -370,22 +512,41 @@
     <script type="module">
         import { firebaseService } from './firebase-config.js';
 
+        let rawProductions = [];
         let productions = [];
         let sales = [];
         let sessionData = null;
         let unsubscribeProductions = null;
         let unsubscribeSales = null;
+        let isDataLoaded = false;
 
-        function getNumber(value) {
-            const num = Number(value);
-            return Number.isFinite(num) ? num : 0;
+        // ===== MOBILE SIDEBAR TOGGLE =====
+        window.toggleSidebar = function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
         }
 
-        function formatNumber(value) {
-            const num = getNumber(value);
-            return Number.isInteger(num) ? num.toString() : num.toFixed(2);
+        window.closeSidebarOnMobile = function() {
+            if (window.innerWidth <= 992) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                sidebar.classList.remove('open');
+                overlay.classList.remove('show');
+            }
         }
 
+        function getNumber(value) { 
+            const num = Number(value); 
+            return Number.isFinite(num) ? num : 0; 
+        }
+        
+        function formatNumber(value) { 
+            const num = getNumber(value); 
+            return Number.isInteger(num) ? num.toString() : num.toFixed(2); 
+        }
+        
         function escapeHtml(value) {
             return String(value ?? '').replace(/[&<>"']/g, function(m) {
                 return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[m];
@@ -393,24 +554,24 @@
         }
 
         function checkAdminAuth() {
-            try {
-                sessionData = JSON.parse(localStorage.getItem('msme_production_session') || 'null');
-            } catch (error) {
-                sessionData = null;
+            try { 
+                sessionData = JSON.parse(localStorage.getItem('msme_production_session') || 'null'); 
+            } catch (error) { 
+                sessionData = null; 
             }
-
-            if (!sessionData || !sessionData.loggedIn) {
-                window.location.href = 'login.html';
-                return false;
+            
+            if (!sessionData || !sessionData.loggedIn) { 
+                window.location.href = 'login.html'; 
+                return false; 
             }
-
+            
             if (sessionData.role !== 'admin') {
                 alert('Admin access only.');
                 window.location.href = 'dashboard.html';
                 return false;
             }
-
-            document.getElementById('userName').innerText = sessionData.name || sessionData.username || 'Admin';
+            
+            document.getElementById('userName').innerHTML = `<i class="fas fa-user-circle"></i> ${sessionData.name || sessionData.username || 'Admin'}`;
             document.getElementById('userRole').innerText = 'ADMIN';
             return true;
         }
@@ -425,100 +586,126 @@
                 if (String(s.productionId) === String(productionId)) {
                     return sum + getNumber(s.saleQty || s.qtySold);
                 }
-
                 if (Array.isArray(s.saleLines)) {
                     return sum + s.saleLines
                         .filter(line => String(line.productionId) === String(productionId))
                         .reduce((lineSum, line) => lineSum + getNumber(line.qty), 0);
                 }
-
                 return sum;
             }, 0);
         }
 
-        function normalizeProduction(p) {
-            const outputQty = getNumber(p.outputQty);
-            const computedSold = getSoldQty(p.id);
-            const soldQty = Math.max(getNumber(p.soldQty), computedSold);
-            const stockQty = Math.max(0, outputQty - soldQty);
-
-            return { ...p, outputQty, soldQty, stockQty };
-        }
-
         function loadData() {
+            if (!Array.isArray(rawProductions)) rawProductions = [];
+            
+            productions = rawProductions.map(p => {
+                const outputQty = getNumber(p.outputQty);
+                const computedSold = getSoldQty(p.id);
+                const soldQty = Math.max(getNumber(p.soldQty || 0), computedSold);
+                const stockQty = Math.max(0, outputQty - soldQty);
+                return { ...p, outputQty, soldQty, stockQty };
+            });
+            
             renderProductionTable();
         }
 
-        function renderProductionTable() {
+        window.renderProductionTable = function() {
             const tbody = document.getElementById('productionTableBody');
             const search = document.getElementById('productSearch').value.toLowerCase().trim();
             const stockFilter = document.getElementById('stockFilter').value;
 
-            let filtered = [...productions];
+            let filtered = Array.isArray(productions) ? [...productions] : [];
 
             if (search) {
-                filtered = filtered.filter(p =>
-                    String(p.prodName || '').toLowerCase().includes(search) ||
+                filtered = filtered.filter(p => 
+                    String(p.prodName || '').toLowerCase().includes(search) || 
                     String(p.batchId || '').toLowerCase().includes(search)
                 );
             }
 
-            if (stockFilter === 'out') filtered = filtered.filter(p => getNumber(p.stockQty) <= 0);
-            if (stockFilter === 'low') filtered = filtered.filter(p => getNumber(p.stockQty) > 0 && getNumber(p.stockQty) <= 5);
-            if (stockFilter === 'available') filtered = filtered.filter(p => getNumber(p.stockQty) > 0);
+            if (stockFilter === 'out') {
+                filtered = filtered.filter(p => getNumber(p.stockQty) <= 0);
+            } else if (stockFilter === 'low') {
+                filtered = filtered.filter(p => getNumber(p.stockQty) > 0 && getNumber(p.stockQty) <= 5);
+            } else if (stockFilter === 'available') {
+                filtered = filtered.filter(p => getNumber(p.stockQty) > 0);
+            }
 
             filtered.sort((a, b) => new Date(b.timestamp || b.prodDate || 0) - new Date(a.timestamp || a.prodDate || 0));
 
             document.getElementById('recordCount').innerText = filtered.length;
 
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" class="empty">No production records found.</td></tr>';
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="11" class="empty">
+                            <i class="fas fa-folder-open" style="font-size:3rem; margin-bottom:16px; opacity:0.2; display:block;"></i>
+                            No production records found.
+                            <span style="font-size:0.9rem; margin-top:12px; display:block; color:var(--primary);">
+                                Click "Manual Production" to add your first record.
+                            </span>
+                        </td>
+                    </tr>
+                `;
                 return;
             }
 
             tbody.innerHTML = filtered.map(p => {
+                if (!p) return '';
                 const profit = getNumber(p.profit);
                 const stock = getNumber(p.stockQty);
 
+                let imageHtml = `<div class="img-placeholder"><i class="fas fa-image"></i></div>`;
+                if (p.imageUrl && typeof p.imageUrl === 'string' && p.imageUrl.trim() !== '') {
+                    imageHtml = `<img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.prodName)}" class="img-thumbnail" loading="lazy" onclick="window.open('${escapeHtml(p.imageUrl)}', '_blank')" style="cursor:pointer;" title="Click to view full image">`;
+                }
+
                 return `
                     <tr>
-                        <td>${escapeHtml(p.prodDate || '')}</td>
+                        <td>${imageHtml}</td>
+                        <td style="white-space:nowrap;">${escapeHtml(p.prodDate || '')}</td>
                         <td><strong>${escapeHtml(p.prodName || '')}</strong></td>
-                        <td><span class="badge">${escapeHtml(p.batchId || '')}</span></td>
+                        <td><span class="badge badge-neutral">${escapeHtml(p.batchId || '')}</span></td>
                         <td>${formatNumber(p.outputQty)}</td>
                         <td>${formatNumber(p.soldQty)}</td>
-                        <td class="${stock <= 0 ? 'stock-low' : 'stock-good'}">${formatNumber(stock)}</td>
+                        <td>
+                            <span class="badge ${stock <= 0 ? 'badge-danger' : 'badge-success'}">
+                                ${formatNumber(stock)}
+                            </span>
+                        </td>
                         <td>₱${getNumber(p.rawCost).toFixed(2)}</td>
                         <td>₱${getNumber(p.sellPrice).toFixed(2)}</td>
                         <td class="${profit >= 0 ? 'profit-positive' : 'profit-negative'}">₱${profit.toFixed(2)}</td>
                         <td>
-                            <button class="btn-small btn-warning" onclick="editProduction('${String(p.id)}')"><i class="fas fa-edit"></i></button>
-                            <button class="btn-small btn-danger" onclick="deleteProduction('${String(p.id)}')"><i class="fas fa-trash"></i></button>
+                            <div class="action-cell">
+                                <button class="btn-edit-icon" onclick="editProduction('${String(p.id)}')"><i class="fas fa-pen"></i></button>
+                                <button class="btn-danger-icon" onclick="deleteProduction('${String(p.id)}')"><i class="fas fa-trash"></i></button>
+                            </div>
                         </td>
                     </tr>
                 `;
             }).join('');
-        }
+        };
 
-        function openProductionModal() {
-            document.getElementById('productionModalTitle').innerHTML = '<i class="fas fa-plus"></i> Add Production';
+        window.openProductionModal = function() {
+            document.getElementById('productionModalTitle').innerHTML = '<i class="fas fa-plus"></i> Manual Production Entry';
             document.getElementById('productionEditForm').reset();
             document.getElementById('editProductionId').value = '';
             document.getElementById('editProdDate').valueAsDate = new Date();
             document.getElementById('editSoldQty').value = 0;
             document.getElementById('editStockQty').value = 0;
             document.getElementById('productionModal').style.display = 'flex';
-        }
+        };
 
-        function closeProductionModal() {
+        window.closeProductionModal = function() {
             document.getElementById('productionModal').style.display = 'none';
-        }
+        };
 
-        function editProduction(id) {
+        window.editProduction = function(id) {
             const p = productions.find(item => String(item.id) === String(id));
             if (!p) return;
 
-            document.getElementById('productionModalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Production';
+            document.getElementById('productionModalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Production Data';
             document.getElementById('editProductionId').value = p.id;
             document.getElementById('editProdName').value = p.prodName || '';
             document.getElementById('editBatchId').value = p.batchId || '';
@@ -529,7 +716,7 @@
             document.getElementById('editRawCost').value = getNumber(p.rawCost).toFixed(2);
             document.getElementById('editSellPrice').value = getNumber(p.sellPrice).toFixed(2);
             document.getElementById('productionModal').style.display = 'flex';
-        }
+        };
 
         function updateEditStockPreview() {
             const output = getNumber(document.getElementById('editOutputQty').value);
@@ -544,14 +731,14 @@
 
             const id = document.getElementById('editProductionId').value;
             const name = document.getElementById('editProdName').value.trim();
-            const batch = document.getElementById('editBatchId').value.trim() || `BATCH-${new Date().toISOString().slice(0,10)}-${Math.floor(Math.random() * 1000)}`;
+            const batch = document.getElementById('editBatchId').value.trim() || `BATCH-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.floor(Math.random() * 1000)}`;
             const date = document.getElementById('editProdDate').value;
             const output = getNumber(document.getElementById('editOutputQty').value);
             const raw = getNumber(document.getElementById('editRawCost').value);
             const price = getNumber(document.getElementById('editSellPrice').value);
 
             if (!name || !date || output <= 0 || raw < 0 || price < 0) {
-                alert('Please enter valid production details.');
+                alert('Please enter valid numerical values and complete required fields.');
                 return;
             }
 
@@ -559,9 +746,14 @@
             const sold = existing ? getNumber(existing.soldQty) : 0;
 
             if (output < sold) {
-                alert(`Output quantity cannot be lower than already sold quantity (${sold}).`);
+                alert(`Output quantity cannot be lower than the already sold quantity (${sold}).`);
                 return;
             }
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            submitBtn.disabled = true;
 
             const record = {
                 prodName: name,
@@ -576,65 +768,70 @@
                 timestamp: existing ? existing.timestamp : new Date().toISOString()
             };
 
-            let result;
-            if (existing) {
-                // Update existing production
-                result = await firebaseService.updateProduction(id, record);
-                if (result.success) {
-                    alert('Production record updated successfully.');
+            try {
+                let result;
+                if (existing) {
+                    result = await firebaseService.updateProduction(id, record);
+                    if (result.success) {
+                        alert('✅ Production record updated successfully.');
+                    } else {
+                        throw new Error(result.error);
+                    }
                 } else {
-                    alert('Error updating production: ' + result.error);
-                    return;
+                    result = await firebaseService.addProduction(record);
+                    if (result.success) {
+                        alert('✅ Production record added successfully.');
+                    } else {
+                        throw new Error(result.error);
+                    }
                 }
-            } else {
-                // Add new production
-                result = await firebaseService.addProduction(record);
-                if (result.success) {
-                    alert('Production record added successfully.');
-                } else {
-                    alert('Error adding production: ' + result.error);
-                    return;
-                }
+                closeProductionModal();
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
             }
-
-            closeProductionModal();
-            // Data will auto-update via Firebase listener
         });
 
-        async function deleteProduction(id) {
+        window.deleteProduction = async function(id) {
             const p = productions.find(item => String(item.id) === String(id));
             if (!p) return;
 
             const relatedSales = sales.filter(s => {
                 if (String(s.productionId) === String(id)) return true;
-                if (Array.isArray(s.saleLines)) return s.saleLines.some(line => String(line.productionId) === String(id));
+                if (Array.isArray(s.saleLines)) {
+                    return s.saleLines.some(line => String(line.productionId) === String(id));
+                }
                 return false;
             });
 
-            let message = `Delete production record for ${p.prodName}?`;
-
+            let message = `Are you sure you want to delete production batch for ${p.prodName}?`;
             if (relatedSales.length > 0) {
-                message += `\n\nThis will also delete ${relatedSales.length} related sale record(s).`;
+                message += `\n\n⚠️ WARNING: This will also delete ${relatedSales.length} related sale record(s).`;
             }
 
             if (!confirm(message)) return;
 
-            const result = await firebaseService.deleteProduction(id);
-            if (result.success) {
-                alert('Production record deleted. Related sales were also removed.');
-            } else {
-                alert('Error deleting production: ' + result.error);
+            try {
+                const result = await firebaseService.deleteProduction(id);
+                if (result.success) {
+                    alert('✅ Production record deleted successfully.');
+                } else {
+                    alert('❌ Error deleting production: ' + result.error);
+                }
+            } catch (error) {
+                alert('❌ System error: ' + error.message);
             }
-            // Data will auto-update via Firebase listener
-        }
+        };
 
-        function exportProductionCSV() {
+        window.exportProductionCSV = function() {
             if (productions.length === 0) {
                 alert('No production data to export.');
                 return;
             }
 
-            const headers = ['Date','Product','Batch','Produced','Sold','Stock','Raw Cost','Selling Price','Profit'];
+            const headers = ['Date','Product','Batch','Produced','Sold','Stock','Raw Cost','Selling Price','Expected Profit','Image URL'];
             const rows = productions.map(p => [
                 p.prodDate || '',
                 p.prodName || '',
@@ -644,7 +841,8 @@
                 getNumber(p.stockQty),
                 getNumber(p.rawCost).toFixed(2),
                 getNumber(p.sellPrice).toFixed(2),
-                getNumber(p.profit).toFixed(2)
+                getNumber(p.profit).toFixed(2),
+                p.imageUrl || ''
             ]);
 
             const csv = [headers, ...rows]
@@ -653,45 +851,81 @@
 
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
-
             const a = document.createElement('a');
             a.href = url;
             a.download = `admin_productions_${new Date().toISOString().slice(0,10)}.csv`;
             a.click();
-
             URL.revokeObjectURL(url);
-        }
+        };
 
         // Initialize Firebase listeners
         function initFirebaseListeners() {
-            // Listen for productions
-            unsubscribeProductions = firebaseService.listenProductions((data) => {
-                productions = data.map(normalizeProduction);
-                loadData();
-            });
+            try {
+                // Listen for productions
+                unsubscribeProductions = firebaseService.listenProductions((data) => {
+                    rawProductions = Array.isArray(data) ? data : [];
+                    isDataLoaded = true;
+                    loadData();
+                });
 
-            // Listen for sales
-            unsubscribeSales = firebaseService.listenSales((data) => {
-                sales = data;
-                loadData();
-            });
+                // Listen for sales
+                unsubscribeSales = firebaseService.listenSales((data) => {
+                    sales = Array.isArray(data) ? data : [];
+                    loadData();
+                });
+
+                // If no data after 3 seconds, show empty state
+                setTimeout(() => {
+                    if (!isDataLoaded) {
+                        const tbody = document.getElementById('productionTableBody');
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="11" class="empty">
+                                    <i class="fas fa-database" style="font-size:3rem; margin-bottom:16px; opacity:0.2; display:block;"></i>
+                                    No production records in Firebase.
+                                    <span style="font-size:0.9rem; margin-top:12px; display:block; color:var(--primary);">
+                                        Click "Manual Production" to add your first record.
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                }, 3000);
+            } catch (error) {
+                console.error("Error setting up listeners:", error);
+                const tbody = document.getElementById('productionTableBody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="11" class="empty">
+                            <i class="fas fa-exclamation-triangle" style="font-size:3rem; margin-bottom:16px; color: #f59e0b; display:block;"></i>
+                            Error connecting to Firebase.
+                            <span style="font-size:0.9rem; margin-top:12px; display:block; color:#dc2626;">
+                                Please check your internet connection and Firebase configuration.
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }
         }
 
-        // Clean up listeners on page unload
         function cleanupListeners() {
-            if (unsubscribeProductions) {
-                unsubscribeProductions();
-                unsubscribeProductions = null;
+            if (unsubscribeProductions) { 
+                unsubscribeProductions(); 
+                unsubscribeProductions = null; 
             }
-            if (unsubscribeSales) {
-                unsubscribeSales();
-                unsubscribeSales = null;
+            if (unsubscribeSales) { 
+                unsubscribeSales(); 
+                unsubscribeSales = null; 
             }
         }
 
         document.getElementById('productSearch').addEventListener('input', renderProductionTable);
         document.getElementById('stockFilter').addEventListener('change', renderProductionTable);
 
+        // Set up logout button
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        // Check admin auth and initialize
         if (checkAdminAuth()) {
             initFirebaseListeners();
         }
@@ -699,7 +933,7 @@
         // Clean up before page unload
         window.addEventListener('beforeunload', cleanupListeners);
 
-        // Make functions globally accessible for inline onclick
+        // Make functions globally accessible
         window.logout = logout;
         window.openProductionModal = openProductionModal;
         window.closeProductionModal = closeProductionModal;

@@ -3,292 +3,419 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics | MSME Production System Management</title>
+    <title>Analytics | MSME Production</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: #f0f4f8; min-height: 100vh; }
+        :root {
+            --primary: #15803d;
+            --primary-hover: #166534;
+            --primary-light: #dcfce7;
+            --secondary: #0f172a;
+            --accent: #f59e0b;
+            --bg-body: #f1f5f9;
+            --bg-surface: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        body { background: var(--bg-body); color: var(--text-dark); min-height: 100vh; overflow-x: hidden; }
         
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* ===== SIDEBAR ===== */
         .sidebar {
             position: fixed;
             left: 0;
             top: 0;
             width: 280px;
             height: 100%;
-            background: linear-gradient(180deg, #1e4b2e 0%, #0f2e1e 100%);
+            background: linear-gradient(180deg, #064e3b 0%, #022c22 100%);
             color: white;
-            z-index: 100;
-            overflow-y: auto;
+            transition: var(--transition);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 24px rgba(0,0,0,0.08);
         }
 
         .sidebar-header {
-            padding: 28px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 32px 24px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .sidebar-header h2 {
-            font-size: 1.3rem;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-header h2 i { 
+            color: var(--accent); 
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-header p {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .sidebar-close-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        .nav-menu { padding: 20px 0; flex-grow: 1; overflow-y: auto; }
+        
+        .nav-item {
+            padding: 12px 20px;
+            margin: 6px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.06);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
+        }
+
+        .nav-item i { width: 22px; font-size: 1.1rem; text-align: center; opacity: 0.8; }
+        .nav-item.active i { opacity: 1; }
+
+        .user-info {
+            padding: 24px;
+            background: rgba(0,0,0,0.3);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .user-name { font-weight: 700; margin-bottom: 4px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+        .user-name i { color: var(--primary-light); }
+        .user-role { font-size: 0.75rem; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; margin-left: 22px; }
+
+        .logout-btn {
+            margin-top: 16px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #e2e8f0;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: #ef4444; border-color: #ef4444; color: white; transform: translateY(-2px);
+        }
+
+        /* ===== MOBILE HEADER & HAMBURGER ===== */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 20px;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 900;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mobile-header .brand-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--secondary);
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .sidebar-header p {
-            font-size: 0.7rem;
-            opacity: 0.7;
-            margin-top: 8px;
-        }
-
-        .nav-menu { padding: 24px 0; }
-
-        .nav-item {
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: rgba(255,255,255,0.8);
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .nav-item:hover,
-        .nav-item.active {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border-left: 4px solid #f59e0b;
-        }
-
-        .nav-item i {
-            width: 24px;
+        .hamburger-btn {
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            color: var(--secondary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
             font-size: 1.2rem;
         }
 
-        .user-info {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 20px 24px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.2);
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 950;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        .user-info .user-name { font-weight: 600; }
-        .user-info .user-role { font-size: 0.75rem; opacity: 0.7; }
-
-        .logout-btn {
-            margin-top: 12px;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            width: 100%;
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
         }
-        
+
+        /* ===== MAIN CONTENT ===== */
         .main-content {
             margin-left: 280px;
-            padding: 24px;
+            padding: clamp(20px, 4vw, 40px);
+            max-width: 1600px;
+            transition: var(--transition);
         }
 
         .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 28px;
-            flex-wrap: wrap;
-            gap: 16px;
+            display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; flex-wrap: wrap; gap: 20px;
         }
 
         .page-title h1 {
-            font-size: 1.8rem;
-            color: #1f3b2c;
+            font-size: clamp(1.8rem, 3vw, 2.2rem); color: var(--secondary); font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px;
         }
-
-        .page-title p {
-            color: #6c7a89;
-            margin-top: 4px;
-        }
+        .page-title p { color: var(--text-muted); font-size: clamp(0.9rem, 1.2vw, 1.05rem); }
 
         .back-btn {
-            background: #e2e8f0;
-            padding: 10px 20px;
-            border-radius: 40px;
+            background: var(--bg-surface);
+            padding: 12px 20px;
+            border-radius: 12px;
             text-decoration: none;
-            color: #2d3748;
+            color: var(--secondary);
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
         }
         
+        .back-btn:hover {
+            border-color: #cbd5e1; box-shadow: var(--shadow-md); transform: translateY(-2px);
+        }
+
+        /* ===== CARDS ===== */
         .card {
-            background: white;
-            border-radius: 28px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-            margin-bottom: 28px;
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 20px 24px;
-            border-bottom: 2px solid #f0f2f5;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .card-header h2 {
-            color: #1f3b2c;
-            font-size: 1.3rem;
-        }
-
-        .card-body { padding: 24px; }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 28px;
-        }
-
-        .stat-card {
-            background: #f8fafc;
-            padding: 20px;
+            background: var(--bg-surface);
             border-radius: 20px;
-            text-align: center;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 32px;
+            overflow: hidden;
+            transition: var(--transition);
         }
 
-        .stat-card i {
-            color: #2c7a4a;
-            font-size: 1.7rem;
-            margin-bottom: 10px;
-        }
+        .card:hover { box-shadow: var(--shadow-md); }
 
-        .stat-number {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #2c7a4a;
-            word-break: break-word;
-        }
-
-        .stat-label {
-            color: #6c7a89;
-            font-size: 0.85rem;
-            margin-top: 6px;
-        }
+        .card-header { padding: 24px clamp(20px, 3vw, 32px); border-bottom: 1px solid var(--border-color); background: rgba(248, 250, 252, 0.5); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .card-header h2 { color: var(--secondary); font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+        .card-header h2 i { color: var(--primary); background: var(--primary-light); padding: 8px; border-radius: 8px; }
         
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 24px;
-        }
+        .card-body { padding: clamp(20px, 3vw, 32px); }
 
-        canvas {
-            max-height: 300px;
-            width: 100%;
-        }
-
+        /* ===== FILTER BAR ===== */
         .filter-bar {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: flex-end;
-            margin-bottom: 20px;
+            display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
         }
 
         .filter-bar select,
         .filter-bar input {
-            padding: 10px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 20px;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            background: var(--bg-body);
+            transition: var(--transition);
+        }
+
+        .filter-bar input:focus, .filter-bar select:focus {
+            border-color: var(--primary); outline: none; background: var(--bg-surface); box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.1);
         }
 
         .filter-bar button {
-            background: #2c7a4a;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-weight: 600;
+            background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; transition: var(--transition); box-shadow: var(--shadow-sm);
         }
 
-        .filter-bar button:hover {
-            background: #1f5e3a;
+        .filter-bar button:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+        /* ===== STATS GRID (DASHBOARD STYLE) ===== */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 32px;
         }
 
+        .stat-card {
+            background: var(--bg-surface); padding: 24px; border-radius: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); transition: var(--transition); display: flex; flex-direction: column; position: relative;
+        }
+
+        .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: #cbd5e1; }
+
+        .stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+
+        .stat-icon-wrapper {
+            width: 48px; height: 48px; border-radius: 12px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+        }
+
+        .stat-label { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-number { font-size: clamp(1.6rem, 2.5vw, 2rem); font-weight: 800; color: var(--secondary); line-height: 1.2; letter-spacing: -0.5px; word-break: break-word; }
+
+        /* ===== CHARTS GRID ===== */
+        .charts-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 32px; margin-bottom: 32px;
+        }
+        
+        canvas { max-height: 320px; width: 100% !important; }
+
+        /* ===== INSIGHTS GRID ===== */
         .insight-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
-            gap: 16px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;
         }
 
         .insight-box {
-            padding: 16px;
-            border-radius: 16px;
-            line-height: 1.5;
+            padding: 24px; border-radius: 16px; line-height: 1.6; border: 1px solid transparent; font-size: 0.95rem; display: flex; flex-direction: column; gap: 8px;
         }
 
-        .insight-green { background:#e8f5e9; }
-        .insight-orange { background:#fff3e0; }
-        .insight-red { background:#fee2e2; }
-        .insight-blue { background:#e3f2fd; }
-        .insight-purple { background:#f3e8ff; }
-        .insight-yellow { background:#fef9c3; }
+        .insight-box i { font-size: 1.5rem; margin-bottom: 8px; }
+        .insight-box strong { font-size: 1.05rem; display: block; }
+
+        .insight-green { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+        .insight-orange { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+        .insight-red { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+        .insight-blue { background: #eff6ff; border-color: #bfdbfe; color: #1e3a8a; }
+        .insight-purple { background: #faf5ff; border-color: #e9d5ff; color: #4c1d95; }
+        .insight-yellow { background: #fefce8; border-color: #fef08a; color: #854d0e; }
+
+        /* ===== RESPONSIVE MEDIA QUERIES ===== */
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-close-btn { display: block; }
+            .mobile-header { display: flex; }
+            .main-content {
+                margin-left: 0;
+                padding-top: calc(70px + clamp(20px, 4vw, 40px));
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .charts-grid { grid-template-columns: 1fr; }
+        }
 
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
-            .main-content { margin-left: 0; }
-            .charts-grid { grid-template-columns: 1fr; }
+            .top-bar { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .top-bar .back-btn { width: 100%; justify-content: center; }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .filter-bar select, .filter-bar input, .filter-bar button { width: 100%; }
+            .card-header, .card-body { padding: 20px; }
         }
     </style>
 </head>
 
 <body>
-    <div class="sidebar">
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="brand-title">
+            <i class="fas fa-industry" style="color: var(--primary);"></i> MSME Production
+        </div>
+        <button class="hamburger-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h2><i class="fas fa-chart-line"></i> MSME Production</h2>
-            <p>Management System</p>
+            <h2><i class="fas fa-industry"></i> MSME Production</h2>
+            <button class="sidebar-close-btn" onclick="toggleSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div style="padding: 0 24px 16px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <p>Management Workspace</p>
         </div>
 
         <div class="nav-menu">
-            <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
+            <a href="dashboard.html" class="nav-item" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-th-large"></i> Dashboard
             </a>
-
-            <a href="production.html" class="nav-item">
-                <i class="fas fa-plus-circle"></i> Record Production
+            <a href="production.html" class="nav-item" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-hammer"></i> Record Production
             </a>
-
-            <a href="sales.html" class="nav-item">
-                <i class="fas fa-cash-register"></i> Record Sale
+            <a href="sales.html" class="nav-item" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-file-invoice-dollar"></i> Record Sale
             </a>
-
-            <a href="analytics.html" class="nav-item active">
-                <i class="fas fa-chart-bar"></i> Analytics
+            <a href="analytics.html" class="nav-item active" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-chart-pie"></i> Analytics
             </a>
-
-            <a href="records.html" class="nav-item">
-                <i class="fas fa-database"></i> Production Records
+            <a href="records.html" class="nav-item" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-archive"></i> Production Records
             </a>
-
-            <a href="reports.html" class="nav-item">
-                <i class="fas fa-file-alt"></i> Reports
+            <a href="reports.html" class="nav-item" onclick="closeSidebarOnMobile()">
+                <i class="fas fa-chart-line"></i> Reports
             </a>
         </div>
 
         <div class="user-info">
-            <div class="user-name" id="userName">Loading...</div>
+            <div class="user-name" id="userName"><i class="fas fa-user-circle"></i> Loading...</div>
             <div class="user-role" id="userRole">Loading...</div>
 
             <button class="logout-btn" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> Logout
+                <i class="fas fa-sign-out-alt"></i> Sign Out
             </button>
         </div>
     </div>
@@ -296,8 +423,8 @@
     <div class="main-content">
         <div class="top-bar">
             <div class="page-title">
-                <h1><i class="fas fa-chart-bar"></i> Production Analytics</h1>
-                <p>MSME Production System Management - Visual insights, sales, stock, and performance metrics</p>
+                <h1>Production Analytics</h1>
+                <p>Visual insights, sales trends, stock levels, and performance metrics.</p>
             </div>
 
             <a href="dashboard.html" class="back-btn">
@@ -308,7 +435,7 @@
         <!-- Date Range Filter -->
         <div class="card">
             <div class="card-header">
-                <h2><i class="fas fa-calendar-alt"></i> Filter Data</h2>
+                <h2><i class="fas fa-calendar-alt"></i> Filter Data Range</h2>
             </div>
 
             <div class="card-body">
@@ -321,11 +448,11 @@
                         <option value="custom">Custom Range</option>
                     </select>
 
-                    <input type="date" id="startDate" style="display:none;">
-                    <input type="date" id="endDate" style="display:none;">
+                    <input type="date" id="startDate" style="display:none;" title="Start Date">
+                    <input type="date" id="endDate" style="display:none;" title="End Date">
 
                     <button id="applyFilterBtn">
-                        Apply Filter
+                        <i class="fas fa-filter"></i> Apply Filter
                     </button>
                 </div>
             </div>
@@ -338,7 +465,7 @@
         <div class="charts-grid">
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="fas fa-chart-line"></i> Profit Trend</h2>
+                    <h2><i class="fas fa-chart-line"></i> Expected Profit Trend</h2>
                 </div>
                 <div class="card-body">
                     <canvas id="profitTrendChart"></canvas>
@@ -347,7 +474,7 @@
 
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="fas fa-cash-register"></i> Sales Trend</h2>
+                    <h2><i class="fas fa-cash-register"></i> Sales Revenue Trend</h2>
                 </div>
                 <div class="card-body">
                     <canvas id="salesTrendChart"></canvas>
@@ -356,7 +483,7 @@
 
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="fas fa-chart-bar"></i> Top Products by Profit</h2>
+                    <h2><i class="fas fa-crown"></i> Top Products by Profit</h2>
                 </div>
                 <div class="card-body">
                     <canvas id="topProductsChart"></canvas>
@@ -365,7 +492,7 @@
 
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="fas fa-warehouse"></i> Stock by Product</h2>
+                    <h2><i class="fas fa-warehouse"></i> Remaining Stock by Product</h2>
                 </div>
                 <div class="card-body">
                     <canvas id="stockChart"></canvas>
@@ -376,14 +503,14 @@
                 <div class="card-header">
                     <h2><i class="fas fa-chart-pie"></i> Profit Distribution</h2>
                 </div>
-                <div class="card-body">
-                    <canvas id="profitDistributionChart"></canvas>
+                <div class="card-body" style="display: flex; justify-content: center;">
+                    <canvas id="profitDistributionChart" style="max-width: 400px;"></canvas>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="fas fa-chart-simple"></i> Monthly Performance</h2>
+                    <h2><i class="fas fa-chart-column"></i> Monthly Performance</h2>
                 </div>
                 <div class="card-body">
                     <canvas id="monthlyChart"></canvas>
@@ -394,7 +521,7 @@
         <!-- Key Insights -->
         <div class="card">
             <div class="card-header">
-                <h2><i class="fas fa-lightbulb"></i> Key Insights</h2>
+                <h2><i class="fas fa-lightbulb"></i> Key Business Insights</h2>
             </div>
 
             <div class="card-body" id="insightsContainer"></div>
@@ -416,6 +543,23 @@
         let profitDistributionChart;
         let monthlyChart;
         
+        // ===== MOBILE SIDEBAR TOGGLE =====
+        window.toggleSidebar = function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        window.closeSidebarOnMobile = function() {
+            if (window.innerWidth <= 992) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                sidebar.classList.remove('open');
+                overlay.classList.remove('show');
+            }
+        }
+
         function checkAuth() {
             const session = localStorage.getItem("msme_production_session");
 
@@ -431,19 +575,40 @@
                 return false;
             }
 
-            document.getElementById("userName").innerText = sessionData.name || sessionData.username;
+            document.getElementById("userName").innerHTML = `<i class="fas fa-user-circle"></i> ${sessionData.name || sessionData.username}`;
             document.getElementById("userRole").innerText = sessionData.role.toUpperCase();
 
             return true;
         }
         
         function logout() {
+            if(typeof firebaseService.logoutUser === 'function') {
+                firebaseService.logoutUser();
+            }
             localStorage.removeItem("msme_production_session");
             window.location.href = "login.html";
         }
+
+        function getNumber(value) {
+            const num = Number(value);
+            return Number.isFinite(num) ? num : 0;
+        }
+
+        function formatNumber(value) {
+            const num = getNumber(value);
+            return Number.isInteger(num) ? num.toString() : num.toFixed(2);
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
         
         function loadData() {
-            // Listen for real-time updates
             if (unsubscribeProductions) unsubscribeProductions();
             if (unsubscribeSales) unsubscribeSales();
             
@@ -480,13 +645,7 @@
 
                 if(!map[product]) {
                     map[product] = {
-                        product,
-                        produced: 0,
-                        sold: 0,
-                        stock: 0,
-                        profit: 0,
-                        rawCost: 0,
-                        revenue: 0
+                        product, produced: 0, sold: 0, stock: 0, profit: 0, rawCost: 0, revenue: 0
                     };
                 }
 
@@ -501,13 +660,7 @@
 
                 if(!map[product]) {
                     map[product] = {
-                        product,
-                        produced: 0,
-                        sold: 0,
-                        stock: 0,
-                        profit: 0,
-                        rawCost: 0,
-                        revenue: 0
+                        product, produced: 0, sold: 0, stock: 0, profit: 0, rawCost: 0, revenue: 0
                     };
                 }
 
@@ -536,9 +689,7 @@
         }
 
         function filterProductionsByDateRange(items, period, start, end) {
-            if(period === "all") {
-                return items;
-            }
+            if(period === "all") return items;
 
             const today = new Date();
             let cutoff = new Date();
@@ -550,10 +701,7 @@
             } else if(period === "90") {
                 cutoff.setDate(today.getDate() - 90);
             } else if(period === "custom" && start && end) {
-                if(start > end) {
-                    return [];
-                }
-
+                if(start > end) return [];
                 return items.filter(p => p.prodDate >= start && p.prodDate <= end);
             }
 
@@ -561,9 +709,7 @@
         }
 
         function filterSalesByDateRange(items, period, start, end) {
-            if(period === "all") {
-                return items;
-            }
+            if(period === "all") return items;
 
             const today = new Date();
             let cutoff = new Date();
@@ -575,10 +721,7 @@
             } else if(period === "90") {
                 cutoff.setDate(today.getDate() - 90);
             } else if(period === "custom" && start && end) {
-                if(start > end) {
-                    return [];
-                }
-
+                if(start > end) return [];
                 return items.filter(s => s.saleDate >= start && s.saleDate <= end);
             }
 
@@ -587,90 +730,78 @@
         
         function updateSummaryStats(filteredProductions, filteredSales) {
             const totalProductions = filteredProductions.length;
-
-            const totalProfit = filteredProductions.reduce((sum, p) => {
-                return sum + getNumber(p.profit);
-            }, 0);
-
-            const totalRawCost = filteredProductions.reduce((sum, p) => {
-                return sum + getNumber(p.rawCost);
-            }, 0);
-
-            const totalUnitsProduced = filteredProductions.reduce((sum, p) => {
-                return sum + getNumber(p.outputQty);
-            }, 0);
-
-            const totalUnitsSold = filteredSales.reduce((sum, s) => {
-                return sum + getNumber(s.saleQty);
-            }, 0);
-
-            const totalSalesRevenue = filteredSales.reduce((sum, s) => {
-                return sum + getNumber(s.totalAmount);
-            }, 0);
-
+            const totalProfit = filteredProductions.reduce((sum, p) => sum + getNumber(p.profit), 0);
+            const totalRawCost = filteredProductions.reduce((sum, p) => sum + getNumber(p.rawCost), 0);
+            const totalUnitsProduced = filteredProductions.reduce((sum, p) => sum + getNumber(p.outputQty), 0);
+            const totalUnitsSold = filteredSales.reduce((sum, s) => sum + getNumber(s.saleQty), 0);
+            const totalSalesRevenue = filteredSales.reduce((sum, s) => sum + getNumber(s.totalAmount), 0);
             const remainingStock = getTotalStock(filteredProductions, sales);
-
-            const avgProfitPerUnit = totalUnitsProduced > 0 ? totalProfit / totalUnitsProduced : 0;
-
             const productStats = getProductStats(filteredProductions, filteredSales);
-
-            const bestProduct = productStats.reduce((best, item) => {
-                return item.profit > (best?.profit ?? -Infinity) ? item : best;
-            }, null);
+            const bestProduct = productStats.reduce((best, item) => item.profit > (best?.profit ?? -Infinity) ? item : best, null);
             
             document.getElementById("summaryStats").innerHTML = `
                 <div class="stat-card">
-                    <i class="fas fa-boxes"></i>
+                    <div class="stat-header">
+                        <div class="stat-label">Total Batches</div>
+                        <div class="stat-icon-wrapper"><i class="fas fa-boxes"></i></div>
+                    </div>
                     <div class="stat-number">${totalProductions}</div>
-                    <div class="stat-label">Total Batches</div>
                 </div>
 
                 <div class="stat-card">
-                    <i class="fas fa-cubes"></i>
+                    <div class="stat-header">
+                        <div class="stat-label">Units Produced</div>
+                        <div class="stat-icon-wrapper" style="background:#e0f2fe; color:#0284c7;"><i class="fas fa-cubes"></i></div>
+                    </div>
                     <div class="stat-number">${formatNumber(totalUnitsProduced)}</div>
-                    <div class="stat-label">Units Produced</div>
                 </div>
 
                 <div class="stat-card">
-                    <i class="fas fa-cash-register"></i>
+                    <div class="stat-header">
+                        <div class="stat-label">Units Sold</div>
+                        <div class="stat-icon-wrapper" style="background:#fef3c7; color:#d97706;"><i class="fas fa-receipt"></i></div>
+                    </div>
                     <div class="stat-number">${formatNumber(totalUnitsSold)}</div>
-                    <div class="stat-label">Units Sold</div>
                 </div>
 
                 <div class="stat-card">
-                    <i class="fas fa-warehouse"></i>
+                    <div class="stat-header">
+                        <div class="stat-label">Remaining Stock</div>
+                        <div class="stat-icon-wrapper" style="background:#f3e8ff; color:#9333ea;"><i class="fas fa-warehouse"></i></div>
+                    </div>
                     <div class="stat-number">${formatNumber(remainingStock)}</div>
-                    <div class="stat-label">Remaining Stock</div>
                 </div>
 
                 <div class="stat-card">
-                    <i class="fas fa-money-bill-wave"></i>
+                    <div class="stat-header">
+                        <div class="stat-label">Sales Revenue</div>
+                        <div class="stat-icon-wrapper" style="background:#dcfce7; color:#16a34a;"><i class="fas fa-money-bill-wave"></i></div>
+                    </div>
                     <div class="stat-number">₱${totalSalesRevenue.toFixed(2)}</div>
-                    <div class="stat-label">Sales Revenue</div>
                 </div>
 
                 <div class="stat-card">
-                    <i class="fas fa-coins"></i>
+                    <div class="stat-header">
+                        <div class="stat-label">Raw Material Cost</div>
+                        <div class="stat-icon-wrapper" style="background:#fee2e2; color:#dc2626;"><i class="fas fa-coins"></i></div>
+                    </div>
                     <div class="stat-number">₱${totalRawCost.toFixed(2)}</div>
-                    <div class="stat-label">Raw Material Cost</div>
                 </div>
 
                 <div class="stat-card">
-                    <i class="fas fa-chart-line"></i>
+                    <div class="stat-header">
+                        <div class="stat-label">Expected Profit</div>
+                        <div class="stat-icon-wrapper" style="background:#dcfce7; color:#16a34a;"><i class="fas fa-chart-line"></i></div>
+                    </div>
                     <div class="stat-number">₱${totalProfit.toFixed(2)}</div>
-                    <div class="stat-label">Expected Profit</div>
                 </div>
 
                 <div class="stat-card">
-                    <i class="fas fa-chart-simple"></i>
-                    <div class="stat-number">₱${avgProfitPerUnit.toFixed(2)}</div>
-                    <div class="stat-label">Avg Profit / Unit</div>
-                </div>
-
-                <div class="stat-card">
-                    <i class="fas fa-trophy"></i>
-                    <div class="stat-number">${bestProduct ? escapeHtml(bestProduct.product) : "-"}</div>
-                    <div class="stat-label">Best Product</div>
+                    <div class="stat-header">
+                        <div class="stat-label">Best Product</div>
+                        <div class="stat-icon-wrapper" style="background:#fefce8; color:#a16207;"><i class="fas fa-trophy"></i></div>
+                    </div>
+                    <div class="stat-number" style="font-size: 1.4rem; padding-top: 6px;">${bestProduct ? escapeHtml(bestProduct.product) : "-"}</div>
                 </div>
             `;
         }
@@ -684,50 +815,75 @@
             updateMonthlyChart(filteredProductions, filteredSales);
         }
 
+        function createChartConfig(type, labels, label, data, color, bgGradient = null) {
+            return {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        borderColor: color,
+                        backgroundColor: bgGradient || color,
+                        borderWidth: type === 'line' ? 3 : 1,
+                        borderRadius: type === 'bar' ? 6 : 0,
+                        fill: type === 'line',
+                        tension: 0.4,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: color,
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            padding: 12,
+                            titleFont: { size: 13, family: 'Inter' },
+                            bodyFont: { size: 14, family: 'Inter', weight: 'bold' },
+                            callbacks: {
+                                label: ctx => {
+                                    let val = ctx.raw;
+                                    return type === 'pie' ? `₱${getNumber(val).toFixed(2)}` : (label.includes('Stock') ? `${formatNumber(val)} units` : `₱${getNumber(val).toFixed(2)}`);
+                                }
+                            }
+                        }
+                    },
+                    scales: type === 'pie' ? {} : {
+                        x: { grid: { display: false } },
+                        y: { 
+                            border: { dash: [4, 4] },
+                            grid: { color: '#e2e8f0' },
+                            ticks: { callback: value => label.includes('Stock') ? value : '₱' + value }
+                        }
+                    }
+                }
+            };
+        }
+
         function updateProfitTrendChart(filteredProductions) {
             const dateMap = {};
             const sorted = [...filteredProductions].sort((a,b) => new Date(a.prodDate) - new Date(b.prodDate));
             const dates = [...new Set(sorted.map(p => p.prodDate).filter(Boolean))].slice(-14);
 
             dates.forEach(d => dateMap[d] = 0);
-
             filteredProductions.forEach(p => {
-                if(dateMap[p.prodDate] !== undefined) {
-                    dateMap[p.prodDate] += getNumber(p.profit);
-                }
+                if(dateMap[p.prodDate] !== undefined) dateMap[p.prodDate] += getNumber(p.profit);
             });
 
-            const profitValues = dates.map(d => dateMap[d]);
+            if(profitTrendChart) profitTrendChart.destroy();
+            const ctx = document.getElementById("profitTrendChart").getContext("2d");
             
-            if(profitTrendChart) {
-                profitTrendChart.destroy();
-            }
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(21, 128, 61, 0.3)');
+            gradient.addColorStop(1, 'rgba(21, 128, 61, 0.0)');
 
-            profitTrendChart = new Chart(document.getElementById("profitTrendChart"), {
-                type: "line",
-                data: {
-                    labels: dates.map(d => d.slice(5)),
-                    datasets: [{
-                        label: "Expected Profit (₱)",
-                        data: profitValues,
-                        borderColor: "#2c7a4a",
-                        backgroundColor: "rgba(44,122,74,0.1)",
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => `₱${getNumber(ctx.raw).toFixed(2)}`
-                            }
-                        }
-                    }
-                }
-            });
+            profitTrendChart = new Chart(ctx, createChartConfig('line', dates.map(d => d.slice(5)), 'Expected Profit (₱)', dates.map(d => dateMap[d]), '#15803d', gradient));
         }
 
         function updateSalesTrendChart(filteredSales) {
@@ -736,147 +892,68 @@
             const dates = [...new Set(sorted.map(s => s.saleDate).filter(Boolean))].slice(-14);
 
             dates.forEach(d => dateMap[d] = 0);
-
             filteredSales.forEach(s => {
-                if(dateMap[s.saleDate] !== undefined) {
-                    dateMap[s.saleDate] += getNumber(s.totalAmount);
-                }
+                if(dateMap[s.saleDate] !== undefined) dateMap[s.saleDate] += getNumber(s.totalAmount);
             });
 
-            const salesValues = dates.map(d => dateMap[d]);
+            if(salesTrendChart) salesTrendChart.destroy();
+            const ctx = document.getElementById("salesTrendChart").getContext("2d");
 
-            if(salesTrendChart) {
-                salesTrendChart.destroy();
-            }
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(245, 158, 11, 0.3)');
+            gradient.addColorStop(1, 'rgba(245, 158, 11, 0.0)');
 
-            salesTrendChart = new Chart(document.getElementById("salesTrendChart"), {
-                type: "line",
-                data: {
-                    labels: dates.map(d => d.slice(5)),
-                    datasets: [{
-                        label: "Sales Revenue (₱)",
-                        data: salesValues,
-                        borderColor: "#f59e0b",
-                        backgroundColor: "rgba(245,158,11,0.12)",
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => `₱${getNumber(ctx.raw).toFixed(2)}`
-                            }
-                        }
-                    }
-                }
-            });
+            salesTrendChart = new Chart(ctx, createChartConfig('line', dates.map(d => d.slice(5)), 'Sales Revenue (₱)', dates.map(d => dateMap[d]), '#f59e0b', gradient));
         }
 
         function updateTopProductsChart(filteredProductions, filteredSales) {
             const productStats = getProductStats(filteredProductions, filteredSales);
-
-            const topProducts = productStats
-                .sort((a,b) => b.profit - a.profit)
-                .slice(0, 6);
+            const topProducts = productStats.sort((a,b) => b.profit - a.profit).slice(0, 6);
             
-            if(topProductsChart) {
-                topProductsChart.destroy();
-            }
-
-            topProductsChart = new Chart(document.getElementById("topProductsChart"), {
-                type: "bar",
-                data: {
-                    labels: topProducts.map(p => p.product),
-                    datasets: [{
-                        label: "Expected Profit (₱)",
-                        data: topProducts.map(p => p.profit),
-                        backgroundColor: "#2c7a4a",
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => `₱${getNumber(ctx.raw).toFixed(2)}`
-                            }
-                        }
-                    }
-                }
-            });
+            if(topProductsChart) topProductsChart.destroy();
+            const ctx = document.getElementById("topProductsChart").getContext("2d");
+            topProductsChart = new Chart(ctx, createChartConfig('bar', topProducts.map(p => p.product), 'Expected Profit (₱)', topProducts.map(p => p.profit), '#15803d'));
         }
 
         function updateStockChart(filteredProductions, sourceSales) {
             const productStats = getProductStats(filteredProductions, sourceSales);
+            const topStock = productStats.sort((a,b) => b.stock - a.stock).slice(0, 8);
 
-            const topStock = productStats
-                .sort((a,b) => b.stock - a.stock)
-                .slice(0, 8);
-
-            if(stockChart) {
-                stockChart.destroy();
-            }
-
-            stockChart = new Chart(document.getElementById("stockChart"), {
-                type: "bar",
-                data: {
-                    labels: topStock.map(p => p.product),
-                    datasets: [{
-                        label: "Remaining Stock",
-                        data: topStock.map(p => p.stock),
-                        backgroundColor: "#2563eb",
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => `${formatNumber(ctx.raw)} units`
-                            }
-                        }
-                    }
-                }
-            });
+            if(stockChart) stockChart.destroy();
+            const ctx = document.getElementById("stockChart").getContext("2d");
+            stockChart = new Chart(ctx, createChartConfig('bar', topStock.map(p => p.product), 'Remaining Stock', topStock.map(p => p.stock), '#3b82f6'));
         }
 
         function updateProfitDistributionChart(filteredProductions) {
-            const profitable = filteredProductions
-                .filter(p => getNumber(p.profit) > 0)
-                .reduce((sum, p) => sum + getNumber(p.profit), 0);
-
-            const loss = filteredProductions
-                .filter(p => getNumber(p.profit) < 0)
-                .reduce((sum, p) => sum + Math.abs(getNumber(p.profit)), 0);
+            const profitable = filteredProductions.filter(p => getNumber(p.profit) > 0).reduce((sum, p) => sum + getNumber(p.profit), 0);
+            const loss = filteredProductions.filter(p => getNumber(p.profit) < 0).reduce((sum, p) => sum + Math.abs(getNumber(p.profit)), 0);
             
-            if(profitDistributionChart) {
-                profitDistributionChart.destroy();
-            }
+            if(profitDistributionChart) profitDistributionChart.destroy();
+            const ctx = document.getElementById("profitDistributionChart").getContext("2d");
 
-            profitDistributionChart = new Chart(document.getElementById("profitDistributionChart"), {
-                type: "pie",
+            profitDistributionChart = new Chart(ctx, {
+                type: "doughnut",
                 data: {
                     labels: ["Profitable Batches", "Loss Batches"],
                     datasets: [{
                         data: [profitable, loss],
-                        backgroundColor: ["#2c7a4a", "#dc2626"]
+                        backgroundColor: ["#15803d", "#ef4444"],
+                        borderWidth: 0,
+                        hoverOffset: 4
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
+                        legend: { position: 'bottom' },
                         tooltip: {
-                            callbacks: {
-                                label: ctx => `₱${getNumber(ctx.raw).toFixed(2)}`
-                            }
+                            backgroundColor: '#0f172a',
+                            padding: 12,
+                            callbacks: { label: ctx => `₱${getNumber(ctx.raw).toFixed(2)}` }
                         }
-                    }
+                    },
+                    cutout: '65%'
                 }
             });
         }
@@ -887,169 +964,113 @@
 
             filteredProductions.forEach(p => {
                 if(!p.prodDate) return;
-
                 const month = p.prodDate.slice(0,7);
                 monthlyProfit[month] = (monthlyProfit[month] || 0) + getNumber(p.profit);
             });
 
             filteredSales.forEach(s => {
                 if(!s.saleDate) return;
-
                 const month = s.saleDate.slice(0,7);
                 monthlySales[month] = (monthlySales[month] || 0) + getNumber(s.totalAmount);
             });
 
-            const months = [...new Set([
-                ...Object.keys(monthlyProfit),
-                ...Object.keys(monthlySales)
-            ])].sort();
+            const months = [...new Set([...Object.keys(monthlyProfit), ...Object.keys(monthlySales)])].sort();
             
-            if(monthlyChart) {
-                monthlyChart.destroy();
-            }
+            if(monthlyChart) monthlyChart.destroy();
+            const ctx = document.getElementById("monthlyChart").getContext("2d");
 
-            monthlyChart = new Chart(document.getElementById("monthlyChart"), {
+            monthlyChart = new Chart(ctx, {
                 type: "bar",
                 data: {
                     labels: months,
                     datasets: [
-                        {
-                            label: "Expected Profit (₱)",
-                            data: months.map(m => monthlyProfit[m] || 0),
-                            backgroundColor: "#2c7a4a",
-                            borderRadius: 8
-                        },
-                        {
-                            label: "Sales Revenue (₱)",
-                            data: months.map(m => monthlySales[m] || 0),
-                            backgroundColor: "#f59e0b",
-                            borderRadius: 8
-                        }
+                        { label: "Expected Profit (₱)", data: months.map(m => monthlyProfit[m] || 0), backgroundColor: "#15803d", borderRadius: 6 },
+                        { label: "Sales Revenue (₱)", data: months.map(m => monthlySales[m] || 0), backgroundColor: "#f59e0b", borderRadius: 6 }
                     ]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
+                        legend: { position: 'top' },
                         tooltip: {
-                            callbacks: {
-                                label: ctx => `${ctx.dataset.label}: ₱${getNumber(ctx.raw).toFixed(2)}`
-                            }
+                            backgroundColor: '#0f172a', padding: 12,
+                            callbacks: { label: ctx => `${ctx.dataset.label}: ₱${getNumber(ctx.raw).toFixed(2)}` }
                         }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { border: { dash: [4, 4] }, grid: { color: '#e2e8f0' }, ticks: { callback: value => '₱' + value } }
                     }
                 }
             });
         }
         
         function updateInsights(filteredProductions, filteredSales) {
-            const totalProfit = filteredProductions.reduce((sum, p) => {
-                return sum + getNumber(p.profit);
-            }, 0);
-
-            const totalRawCost = filteredProductions.reduce((sum, p) => {
-                return sum + getNumber(p.rawCost);
-            }, 0);
-
-            const totalSalesRevenue = filteredSales.reduce((sum, s) => {
-                return sum + getNumber(s.totalAmount);
-            }, 0);
-
-            const totalUnitsProduced = filteredProductions.reduce((sum, p) => {
-                return sum + getNumber(p.outputQty);
-            }, 0);
-
-            const totalUnitsSold = filteredSales.reduce((sum, s) => {
-                return sum + getNumber(s.saleQty);
-            }, 0);
-
+            const totalProfit = filteredProductions.reduce((sum, p) => sum + getNumber(p.profit), 0);
+            const totalRawCost = filteredProductions.reduce((sum, p) => sum + getNumber(p.rawCost), 0);
+            const totalSalesRevenue = filteredSales.reduce((sum, s) => sum + getNumber(s.totalAmount), 0);
+            const totalUnitsProduced = filteredProductions.reduce((sum, p) => sum + getNumber(p.outputQty), 0);
+            const totalUnitsSold = filteredSales.reduce((sum, s) => sum + getNumber(s.saleQty), 0);
             const remainingStock = getTotalStock(filteredProductions, sales);
-
             const avgProfit = filteredProductions.length > 0 ? totalProfit / filteredProductions.length : 0;
-
             const productStats = getProductStats(filteredProductions, filteredSales);
 
-            const bestProduct = productStats.reduce((best, item) => {
-                return item.profit > (best?.profit ?? -Infinity) ? item : best;
-            }, null);
+            const bestProduct = productStats.reduce((best, item) => item.profit > (best?.profit ?? -Infinity) ? item : best, null);
+            const lowestStockProduct = productStats.filter(item => item.produced > 0).reduce((lowest, item) => item.stock < (lowest?.stock ?? Infinity) ? item : lowest, null);
+            const worstProduct = filteredProductions.reduce((worst, p) => getNumber(p.profit) < (getNumber(worst?.profit) || Infinity) ? p : worst, null);
 
-            const lowestStockProduct = productStats
-                .filter(item => item.produced > 0)
-                .reduce((lowest, item) => {
-                    return item.stock < (lowest?.stock ?? Infinity) ? item : lowest;
-                }, null);
-
-            const worstProduct = filteredProductions.reduce((worst, p) => {
-                return getNumber(p.profit) < (getNumber(worst?.profit) || Infinity) ? p : worst;
-            }, null);
-
-            const sellThroughRate = totalUnitsProduced > 0
-                ? (totalUnitsSold / totalUnitsProduced) * 100
-                : 0;
-
-            const rawCostRatio = totalSalesRevenue > 0
-                ? (totalRawCost / totalSalesRevenue) * 100
-                : 0;
+            const sellThroughRate = totalUnitsProduced > 0 ? (totalUnitsSold / totalUnitsProduced) * 100 : 0;
+            const rawCostRatio = totalSalesRevenue > 0 ? (totalRawCost / totalSalesRevenue) * 100 : 0;
             
             document.getElementById("insightsContainer").innerHTML = `
                 <div class="insight-grid">
                     <div class="insight-box insight-green">
-                        <i class="fas fa-trophy" style="color:#f59e0b;"></i>
-                        <strong>Top Performer:</strong>
+                        <i class="fas fa-trophy" style="color:#15803d;"></i>
+                        <strong>Top Performer</strong>
                         ${bestProduct ? `${escapeHtml(bestProduct.product)} (₱${getNumber(bestProduct.profit).toFixed(2)} expected profit)` : "No data"}
                     </div>
 
                     <div class="insight-box insight-orange">
-                        <i class="fas fa-chart-line"></i>
-                        <strong>Average Profit per Batch:</strong>
+                        <i class="fas fa-chart-line" style="color:#c2410c;"></i>
+                        <strong>Average Profit per Batch</strong>
                         ₱${avgProfit.toFixed(2)}
                     </div>
 
                     <div class="insight-box insight-red">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <strong>Needs Improvement:</strong>
-                        ${
-                            worstProduct && getNumber(worstProduct.profit) < 0
-                                ? `${escapeHtml(worstProduct.prodName)} (Loss: ₱${Math.abs(getNumber(worstProduct.profit)).toFixed(2)})`
-                                : "All products profitable"
-                        }
+                        <i class="fas fa-exclamation-triangle" style="color:#b91c1c;"></i>
+                        <strong>Needs Improvement</strong>
+                        ${worstProduct && getNumber(worstProduct.profit) < 0 ? `${escapeHtml(worstProduct.prodName)} (Loss: ₱${Math.abs(getNumber(worstProduct.profit)).toFixed(2)})` : "All products profitable"}
                     </div>
 
                     <div class="insight-box insight-blue">
-                        <i class="fas fa-chart-simple"></i>
-                        <strong>Production Efficiency:</strong>
+                        <i class="fas fa-chart-simple" style="color:#1d4ed8;"></i>
+                        <strong>Production Efficiency</strong>
                         ₱${totalProfit.toFixed(2)} expected profit from ${formatNumber(totalUnitsProduced)} produced units
                     </div>
 
                     <div class="insight-box insight-purple">
-                        <i class="fas fa-cash-register"></i>
-                        <strong>Sales Performance:</strong>
+                        <i class="fas fa-cash-register" style="color:#6d28d9;"></i>
+                        <strong>Sales Performance</strong>
                         ₱${totalSalesRevenue.toFixed(2)} revenue from ${formatNumber(totalUnitsSold)} sold units
                     </div>
 
                     <div class="insight-box insight-yellow">
-                        <i class="fas fa-warehouse"></i>
-                        <strong>Stock Status:</strong>
-                        ${formatNumber(remainingStock)} units remaining.
-                        ${
-                            lowestStockProduct
-                                ? `Lowest stock: ${escapeHtml(lowestStockProduct.product)} (${formatNumber(lowestStockProduct.stock)} left)`
-                                : ""
-                        }
+                        <i class="fas fa-warehouse" style="color:#a16207;"></i>
+                        <strong>Stock Status</strong>
+                        ${formatNumber(remainingStock)} units remaining. ${lowestStockProduct ? `<br>Lowest stock: ${escapeHtml(lowestStockProduct.product)} (${formatNumber(lowestStockProduct.stock)} left)` : ""}
                     </div>
 
                     <div class="insight-box insight-green">
-                        <i class="fas fa-percent"></i>
-                        <strong>Sell-through Rate:</strong>
+                        <i class="fas fa-percent" style="color:#15803d;"></i>
+                        <strong>Sell-through Rate</strong>
                         ${sellThroughRate.toFixed(2)}% of produced units have been sold
                     </div>
 
                     <div class="insight-box insight-orange">
-                        <i class="fas fa-coins"></i>
-                        <strong>Raw Cost vs Sales:</strong>
-                        ${
-                            totalSalesRevenue > 0
-                                ? `${rawCostRatio.toFixed(2)}% of sales revenue compared to raw material cost`
-                                : `₱${totalRawCost.toFixed(2)} raw material cost recorded`
-                        }
+                        <i class="fas fa-coins" style="color:#c2410c;"></i>
+                        <strong>Raw Cost vs Sales</strong>
+                        ${totalSalesRevenue > 0 ? `${rawCostRatio.toFixed(2)}% of sales revenue compared to raw material cost` : `₱${totalRawCost.toFixed(2)} raw material cost recorded`}
                     </div>
                 </div>
             `;
@@ -1057,13 +1078,9 @@
         
         document.getElementById("periodFilter").addEventListener("change", (e) => {
             const custom = e.target.value === "custom";
-
             document.getElementById("startDate").style.display = custom ? "inline-block" : "none";
             document.getElementById("endDate").style.display = custom ? "inline-block" : "none";
-
-            if(!custom) {
-                applyFilter();
-            }
+            if(!custom) applyFilter();
         });
 
         document.getElementById("applyFilterBtn").addEventListener("click", () => {
@@ -1075,7 +1092,6 @@
                 alert("Start date cannot be later than end date.");
                 return;
             }
-
             applyFilter();
         });
         
@@ -1090,26 +1106,6 @@
             if (unsubscribeSales) unsubscribeSales();
         });
 
-        function getNumber(value) {
-            const num = Number(value);
-            return Number.isFinite(num) ? num : 0;
-        }
-
-        function formatNumber(value) {
-            const num = getNumber(value);
-            return Number.isInteger(num) ? num.toString() : num.toFixed(2);
-        }
-
-        function escapeHtml(value) {
-            return String(value ?? "")
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#39;");
-        }
-
-        // Make functions globally accessible
         window.logout = logout;
     </script>
 </body>

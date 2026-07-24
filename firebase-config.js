@@ -102,7 +102,8 @@ class FirebaseService {
         uid: user.uid,
         email: user.email,
         name: userData.name || user.email.split('@')[0],
-        role: userData.role || 'user'
+        role: userData.role || 'user',
+        status: userData.status || 'approved'
       };
       
       this.currentUser = userInfo;
@@ -125,11 +126,12 @@ class FirebaseService {
       const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
       const user = userCredential.user;
       
-      // Store user data in Firestore
+      // Store user data in Firestore with pending status
       await setDoc(doc(this.db, COLLECTIONS.USERS, user.uid), {
         ...userData,
         email: email,
         role: userData.role || 'user',
+        status: 'pending', // pending, approved, rejected
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
@@ -140,7 +142,8 @@ class FirebaseService {
           uid: user.uid,
           email: user.email,
           ...userData,
-          role: userData.role || 'user'
+          role: userData.role || 'user',
+          status: 'pending'
         }
       };
     } catch (error) {
@@ -193,6 +196,7 @@ class FirebaseService {
         return {
           success: true,
           role: userDoc.data().role || 'user',
+          status: userDoc.data().status || 'pending',
           data: userDoc.data()
         };
       }
@@ -207,22 +211,20 @@ class FirebaseService {
 
   async createUserWithFirebase(email, password, userData) {
     try {
-      // Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
       const user = userCredential.user;
       
-      // Store user data in Firestore
       await setDoc(doc(this.db, COLLECTIONS.USERS, user.uid), {
         username: userData.username || email.split('@')[0],
         name: userData.name || '',
         email: email,
         role: userData.role || 'user',
-        password: password, // Note: In production, don't store plain text password
+        password: password, 
+        status: 'pending',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
       
-      // Also save to localStorage for backward compatibility
       const storedUsers = JSON.parse(localStorage.getItem('msme_users') || '[]');
       const existingIndex = storedUsers.findIndex(u => u.username === userData.username);
       if (existingIndex >= 0) {
@@ -231,7 +233,8 @@ class FirebaseService {
           name: userData.name,
           email: email,
           role: userData.role || 'user',
-          uid: user.uid
+          uid: user.uid,
+          status: 'pending'
         };
       } else {
         storedUsers.push({
@@ -240,14 +243,16 @@ class FirebaseService {
           name: userData.name,
           email: email,
           role: userData.role || 'user',
-          uid: user.uid
+          uid: user.uid,
+          status: 'pending'
         });
       }
       localStorage.setItem('msme_users', JSON.stringify(storedUsers));
       
       await this.addAuditLog('create', 'user', user.uid, { 
         username: userData.username,
-        role: userData.role || 'user'
+        role: userData.role || 'user',
+        status: 'pending'
       });
       
       return {
@@ -256,7 +261,8 @@ class FirebaseService {
           uid: user.uid,
           email: user.email,
           ...userData,
-          role: userData.role || 'user'
+          role: userData.role || 'user',
+          status: 'pending'
         }
       };
     } catch (error) {
@@ -268,18 +274,204 @@ class FirebaseService {
     }
   }
 
+  // ============ USER APPROVAL METHODS ============
+
+  async createUserWithApproval(email, password, userData) {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
+      const user = userCredential.user;
+      
+      await setDoc(doc(this.db, COLLECTIONS.USERS, user.uid), {
+        username: userData.username || email.split('@')[0],
+        name: userData.name || '',
+        email: email,
+        role: userData.role || 'user',
+        password: password,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      
+      const storedUsers = JSON.parse(localStorage.getItem('msme_users') || '[]');
+      storedUsers.push({
+        username: userData.username,
+        password: password,
+        name: userData.name,
+        email: email,
+        role: userData.role || 'user',
+        uid: user.uid,
+        status: 'pending'
+      });
+      localStorage.setItem('msme_users', JSON.stringify(storedUsers));
+      
+      await this.addAuditLog('create', 'user', user.uid, { 
+        username: userData.username,
+        role: userData.role || 'user',
+        status: 'pending'
+      });
+      
+      return {
+        success: true,
+        user: {
+          uid: user.uid,
+          email: user.email,
+          ...userData,
+          role: userData.role || 'user',
+          status: 'pending'
+        }
+      };
+    } catch (error) {
+      console.error('Create user with approval error:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  async approveUser(uid) {
+    try {
+      const userRef = doc(this.db, COLLECTIONS.USERS, uid);
+      await updateDoc(userRef, {
+        status: 'approved',
+        approvedAt: serverTimestamp(),
+        approvedBy: this.auth.currentUser?.uid || 'system',
+        updatedAt: serverTimestamp()
+      });
+      
+      const storedUsers = JSON.parse(localStorage.getItem('msme_users') || '[]');
+      const userIndex = storedUsers.findIndex(u => u.uid === uid || u.id === uid);
+      if (userIndex >= 0) {
+        storedUsers[userIndex].status = 'approved';
+        localStorage.setItem('msme_users', JSON.stringify(storedUsers));
+      }
+      
+      await this.addAuditLog('approve', 'user', uid, { status: 'approved' });
+      return { success: true };
+    } catch (error) {
+      console.error('Approve user error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async rejectUser(uid) {
+    try {
+      const userRef = doc(this.db, COLLECTIONS.USERS, uid);
+      await updateDoc(userRef, {
+        status: 'rejected',
+        rejectedAt: serverTimestamp(),
+        rejectedBy: this.auth.currentUser?.uid || 'system',
+        updatedAt: serverTimestamp()
+      });
+      
+      const storedUsers = JSON.parse(localStorage.getItem('msme_users') || '[]');
+      const userIndex = storedUsers.findIndex(u => u.uid === uid || u.id === uid);
+      if (userIndex >= 0) {
+        storedUsers[userIndex].status = 'rejected';
+        localStorage.setItem('msme_users', JSON.stringify(storedUsers));
+      }
+      
+      await this.addAuditLog('reject', 'user', uid, { status: 'rejected' });
+      return { success: true };
+    } catch (error) {
+      console.error('Reject user error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getPendingUsers() {
+    try {
+      const q = query(
+        collection(this.db, COLLECTIONS.USERS),
+        where('status', '==', 'pending')
+      );
+      const querySnapshot = await getDocs(q);
+      const users = [];
+      querySnapshot.forEach((doc) => {
+        users.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      return { success: true, data: users };
+    } catch (error) {
+      console.error('Get pending users error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getApprovedUsers() {
+    try {
+      const q = query(
+        collection(this.db, COLLECTIONS.USERS),
+        where('status', '==', 'approved')
+      );
+      const querySnapshot = await getDocs(q);
+      const users = [];
+      querySnapshot.forEach((doc) => {
+        users.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      return { success: true, data: users };
+    } catch (error) {
+      console.error('Get approved users error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getRejectedUsers() {
+    try {
+      const q = query(
+        collection(this.db, COLLECTIONS.USERS),
+        where('status', '==', 'rejected')
+      );
+      const querySnapshot = await getDocs(q);
+      const users = [];
+      querySnapshot.forEach((doc) => {
+        users.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      return { success: true, data: users };
+    } catch (error) {
+      console.error('Get rejected users error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async checkUserStatus(uid) {
+    try {
+      const userDoc = await getDoc(doc(this.db, COLLECTIONS.USERS, uid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        return {
+          success: true,
+          status: data.status || 'pending',
+          data: data
+        };
+      }
+      return { success: false, error: 'User not found' };
+    } catch (error) {
+      console.error('Check user status error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ============ LEGACY USER METHODS (Backward Compatibility) ============
+
   async updateUserInFirebase(uid, updateData) {
     try {
-      // Update user in Firestore
       const userRef = doc(this.db, COLLECTIONS.USERS, uid);
       await updateDoc(userRef, {
         ...updateData,
         updatedAt: serverTimestamp()
       });
       
-      // Update in localStorage for backward compatibility
       const storedUsers = JSON.parse(localStorage.getItem('msme_users') || '[]');
-      const userIndex = storedUsers.findIndex(u => u.uid === uid);
+      const userIndex = storedUsers.findIndex(u => u.uid === uid || u.id === uid);
       if (userIndex >= 0) {
         storedUsers[userIndex] = {
           ...storedUsers[userIndex],
@@ -298,25 +490,46 @@ class FirebaseService {
 
   async deleteUserFromFirebase(uid) {
     try {
-      // Get user data before deleting
       const userDoc = await getDoc(doc(this.db, COLLECTIONS.USERS, uid));
       const userData = userDoc.exists() ? userDoc.data() : null;
       
-      // Delete from Firestore
       await deleteDoc(doc(this.db, COLLECTIONS.USERS, uid));
       
-      // Delete from localStorage
       const storedUsers = JSON.parse(localStorage.getItem('msme_users') || '[]');
-      const filteredUsers = storedUsers.filter(u => u.uid !== uid);
+      const filteredUsers = storedUsers.filter(u => u.uid !== uid && u.id !== uid);
       localStorage.setItem('msme_users', JSON.stringify(filteredUsers));
-      
-      // Note: To delete from Firebase Auth, you need Admin SDK
-      // This will be handled server-side or through Firebase Console
       
       await this.addAuditLog('delete', 'user', uid, { username: userData?.username || 'Unknown' });
       return { success: true };
     } catch (error) {
       console.error('Delete user error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Complete user removal and dashboard access revocation
+  async deleteUserCompletely(uid) {
+    try {
+      const userRef = doc(this.db, COLLECTIONS.USERS, uid);
+      const userSnap = await getDoc(userRef);
+      
+      if (userSnap.exists()) {
+        await updateDoc(userRef, {
+          status: 'deleted',
+          deletedAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        await deleteDoc(userRef);
+      }
+      
+      const storedUsers = JSON.parse(localStorage.getItem('msme_users') || '[]');
+      const filteredUsers = storedUsers.filter(u => u.uid !== uid && u.id !== uid && u.username !== uid);
+      localStorage.setItem('msme_users', JSON.stringify(filteredUsers));
+      
+      await this.addAuditLog('delete', 'user', uid, { action: 'complete_user_removal' });
+      return { success: true };
+    } catch (error) {
+      console.error('Delete user completely error:', error);
       return { success: false, error: error.message };
     }
   }
@@ -338,23 +551,8 @@ class FirebaseService {
     }
   }
 
-  // ============ LEGACY USER METHODS (Backward Compatibility) ============
-
   async getAllUsers() {
-    try {
-      const querySnapshot = await getDocs(collection(this.db, COLLECTIONS.USERS));
-      const users = [];
-      querySnapshot.forEach((doc) => {
-        users.push({
-          id: doc.id,
-          ...doc.data()
-        });
-      });
-      return { success: true, data: users };
-    } catch (error) {
-      console.error('Get users error:', error);
-      return { success: false, error: error.message };
-    }
+    return this.getUsersFromFirebase();
   }
 
   async getUsers() {
@@ -362,49 +560,41 @@ class FirebaseService {
   }
 
   async updateUser(uid, updateData) {
-    try {
-      const userRef = doc(this.db, COLLECTIONS.USERS, uid);
-      await updateDoc(userRef, {
-        ...updateData,
-        updatedAt: serverTimestamp()
-      });
-      
-      await this.addAuditLog('update', 'user', uid, updateData);
-      return { success: true };
-    } catch (error) {
-      console.error('Update user error:', error);
-      return { success: false, error: error.message };
-    }
+    return this.updateUserInFirebase(uid, updateData);
   }
 
   async deleteUser(uid) {
-    try {
-      // Delete user document from Firestore
-      await deleteDoc(doc(this.db, COLLECTIONS.USERS, uid));
-      
-      await this.addAuditLog('delete', 'user', uid, {});
-      return { success: true };
-    } catch (error) {
-      console.error('Delete user error:', error);
-      return { success: false, error: error.message };
-    }
+    return this.deleteUserCompletely(uid);
   }
 
   // ============ PRODUCTIONS CRUD ============
 
   async addProduction(productionData) {
     try {
-      // Calculate stockQty
+      let imageUrl = null;
+      
+      if (productionData.imageFile && productionData.imageFile instanceof File) {
+        try {
+          const filePath = `products/${Date.now()}_${productionData.imageFile.name}`;
+          const fileRef = ref(this.storage, filePath);
+          const snapshot = await uploadBytes(fileRef, productionData.imageFile);
+          imageUrl = await getDownloadURL(snapshot.ref);
+        } catch (storageError) {
+          console.error("Storage upload failed, saving without image:", storageError);
+        }
+      }
+      
+      delete productionData.imageFile;
+      
       const data = {
         ...productionData,
+        imageUrl: imageUrl || productionData.imageUrl || null,
         stockQty: (productionData.outputQty || 0) - (productionData.soldQty || 0),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
       
       const docRef = await addDoc(collection(this.db, COLLECTIONS.PRODUCTIONS), data);
-      
-      // Log the action
       await this.addAuditLog('create', 'production', docRef.id, data);
       
       return {
@@ -422,7 +612,6 @@ class FirebaseService {
     try {
       let q = collection(this.db, COLLECTIONS.PRODUCTIONS);
       
-      // Apply filters
       if (filters.prodName) {
         q = query(q, where('prodName', '==', filters.prodName));
       }
@@ -438,7 +627,6 @@ class FirebaseService {
         );
       }
       
-      // Default ordering
       q = query(q, orderBy('createdAt', 'desc'));
       
       const querySnapshot = await getDocs(q);
@@ -482,9 +670,26 @@ class FirebaseService {
 
   async updateProduction(id, updateData) {
     try {
+      let imageUrl = updateData.imageUrl;
+      
+      if (updateData.imageFile && updateData.imageFile instanceof File) {
+        try {
+          const filePath = `products/${Date.now()}_${updateData.imageFile.name}`;
+          const fileRef = ref(this.storage, filePath);
+          const snapshot = await uploadBytes(fileRef, updateData.imageFile);
+          imageUrl = await getDownloadURL(snapshot.ref);
+        } catch (storageError) {
+          console.error("Storage upload failed during update:", storageError);
+        }
+      }
+      
+      delete updateData.imageFile;
+      if (imageUrl) {
+        updateData.imageUrl = imageUrl;
+      }
+
       const docRef = doc(this.db, COLLECTIONS.PRODUCTIONS, id);
       
-      // Recalculate stock if needed
       if (updateData.outputQty !== undefined || updateData.soldQty !== undefined) {
         const current = await this.getProduction(id);
         if (current.success) {
@@ -497,8 +702,6 @@ class FirebaseService {
       updateData.updatedAt = serverTimestamp();
       
       await updateDoc(docRef, updateData);
-      
-      // Log the action
       await this.addAuditLog('update', 'production', id, updateData);
       
       return { success: true };
@@ -510,25 +713,20 @@ class FirebaseService {
 
   async deleteProduction(id) {
     try {
-      // Check if there are related sales
       const salesQuery = query(
         collection(this.db, COLLECTIONS.SALES),
         where('productionId', '==', id)
       );
       const salesSnapshot = await getDocs(salesQuery);
       
-      // Delete related sales
       const batch = writeBatch(this.db);
       salesSnapshot.forEach((doc) => {
         batch.delete(doc.ref);
       });
       
-      // Delete the production
       batch.delete(doc(this.db, COLLECTIONS.PRODUCTIONS, id));
       
       await batch.commit();
-      
-      // Log the action
       await this.addAuditLog('delete', 'production', id, { 
         deletedSales: salesSnapshot.size 
       });
@@ -540,7 +738,6 @@ class FirebaseService {
     }
   }
 
-  // Real-time listener for productions
   listenProductions(callback, filters = {}) {
     let q = collection(this.db, COLLECTIONS.PRODUCTIONS);
     
@@ -548,7 +745,6 @@ class FirebaseService {
       q = query(q, where('prodName', '==', filters.prodName));
     }
     
-    // Default order by date
     q = query(q, orderBy('createdAt', 'desc'));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -579,8 +775,6 @@ class FirebaseService {
       };
       
       const docRef = await addDoc(collection(this.db, COLLECTIONS.SALES), data);
-      
-      // Log the action
       await this.addAuditLog('create', 'sale', docRef.id, data);
       
       return {
@@ -650,16 +844,13 @@ class FirebaseService {
     }
   }
 
-  // IMPROVED: Delete sale with proper stock restoration
   async deleteSale(id) {
     try {
-      // Get sale data first
       const sale = await this.getSale(id);
       if (!sale.success) {
         return { success: false, error: 'Sale not found' };
       }
       
-      // If sale has saleLines, restore stock for each line
       if (sale.data.saleLines && Array.isArray(sale.data.saleLines) && sale.data.saleLines.length > 0) {
         for (const line of sale.data.saleLines) {
           const production = await this.getProduction(line.productionId);
@@ -679,7 +870,6 @@ class FirebaseService {
           }
         }
       } else if (sale.data.productionId && sale.data.saleQty) {
-        // If no saleLines, use single productionId
         const production = await this.getProduction(sale.data.productionId);
         if (production.success) {
           const prod = production.data;
@@ -697,10 +887,7 @@ class FirebaseService {
         }
       }
       
-      // Delete the sale
       await deleteDoc(doc(this.db, COLLECTIONS.SALES, id));
-      
-      // Log the action
       await this.addAuditLog('delete', 'sale', id, {});
       
       return { success: true };
@@ -710,10 +897,8 @@ class FirebaseService {
     }
   }
 
-  // IMPROVED: Update sale with proper stock management
   async updateSale(id, updateData) {
     try {
-      // Get current sale data
       const current = await this.getSale(id);
       if (!current.success) {
         return { success: false, error: 'Sale not found' };
@@ -721,7 +906,6 @@ class FirebaseService {
       
       const docRef = doc(this.db, COLLECTIONS.SALES, id);
       
-      // If saleLines changed, restore old stock first
       if (current.data.saleLines && Array.isArray(current.data.saleLines) && current.data.saleLines.length > 0) {
         for (const line of current.data.saleLines) {
           const production = await this.getProduction(line.productionId);
@@ -741,7 +925,6 @@ class FirebaseService {
           }
         }
       } else if (current.data.productionId && current.data.saleQty) {
-        // If no saleLines, restore from single production
         const production = await this.getProduction(current.data.productionId);
         if (production.success) {
           const prod = production.data;
@@ -759,7 +942,6 @@ class FirebaseService {
         }
       }
       
-      // Now apply new stock deduction from updateData
       if (updateData.saleLines && Array.isArray(updateData.saleLines) && updateData.saleLines.length > 0) {
         for (const line of updateData.saleLines) {
           const production = await this.getProduction(line.productionId);
@@ -783,7 +965,6 @@ class FirebaseService {
           }
         }
       } else if (updateData.productionId && updateData.saleQty) {
-        // Apply new stock deduction
         const production = await this.getProduction(updateData.productionId);
         if (production.success) {
           const prod = production.data;
@@ -805,11 +986,8 @@ class FirebaseService {
         }
       }
       
-      // Update the sale document
       updateData.updatedAt = serverTimestamp();
       await updateDoc(docRef, updateData);
-      
-      // Log the action
       await this.addAuditLog('update', 'sale', id, updateData);
       
       return { success: true };
@@ -819,7 +997,6 @@ class FirebaseService {
     }
   }
 
-  // Listen to sales in real-time
   listenSales(callback, filters = {}) {
     let q = collection(this.db, COLLECTIONS.SALES);
     
@@ -907,10 +1084,8 @@ class FirebaseService {
       const totalSalesRevenue = sales.data.reduce((sum, s) => sum + (s.totalAmount || 0), 0);
       const totalRawCost = productions.data.reduce((sum, p) => sum + (p.rawCost || 0), 0);
       
-      // Get unique products
       const uniqueProducts = [...new Set(productions.data.map(p => p.prodName))];
       
-      // Stock analytics
       const stockMap = {};
       productions.data.forEach(p => {
         const name = p.prodName || 'Unnamed';
@@ -922,7 +1097,6 @@ class FirebaseService {
         .filter(([_, stock]) => stock <= 5)
         .map(([name, stock]) => ({ name, stock }));
       
-      // Product performance
       const productPerformance = {};
       productions.data.forEach(p => {
         const name = p.prodName || 'Unnamed';
@@ -1010,7 +1184,7 @@ class FirebaseService {
 // Create singleton instance
 const firebaseService = new FirebaseService();
 
-// Export for use in other files
+// Export for use in other files  
 export { 
   firebaseService,
   db,
